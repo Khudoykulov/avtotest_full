@@ -42,6 +42,29 @@ class TestResultAdmin(admin.ModelAdmin):
 
 @admin.register(EducationContent)
 class EducationContentAdmin(admin.ModelAdmin):
-    list_display = ('title', 'category', 'content_type', 'order')
+    list_display = ('title', 'category', 'content_type', 'has_video', 'has_image', 'order')
     list_filter = ('content_type', 'category')
     search_fields = ('title',)
+    fieldsets = (
+        ('Asosiy ma\'lumotlar', {
+            'fields': ('category', 'title', 'content_type', 'order')
+        }),
+        ('Kontent', {
+            'fields': ('text_content',),
+        }),
+        ('Video', {
+            'fields': ('video_url',),
+            'description': 'YouTube, Vimeo yoki boshqa video platformalarning embed URL manzilini kiriting'
+        }),
+        ('Rasm', {
+            'fields': ('image',),
+        }),
+    )
+    
+    def has_video(self, obj):
+        return "✅ Ha" if obj.video_url else "❌ Yo'q"
+    has_video.short_description = 'Video'
+    
+    def has_image(self, obj):
+        return "✅ Ha" if obj.image else "❌ Yo'q"
+    has_image.short_description = 'Rasm'

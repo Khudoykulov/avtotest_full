@@ -280,18 +280,52 @@
         </div>
 
         <div class="action-cards">
+            <!-- 1-bo'lim: Kategoriya bo'yicha Test -->
             <div class="action-card">
-                <div class="action-icon">🚗</div>
-                <h3>Testni boshlash</h3>
-                <p>Haydovchilik qoidalari bo'yicha professional testlarni topshiring va bilimlaringizni sinab ko'ring</p>
-                <a href="{% url 'quiz:tickets' %}" class="btn">Testni boshlash</a>
+                <div class="action-icon">📋</div>
+                <h3>Kategoriya bo'yicha Test</h3>
+                <p>Yo'l belgilari, qoidalar va boshqa kategoriyalar bo'yicha alohida testlar ishlang va o'z bilimingizni sinab ko'ring</p>
+                <a href="{% url 'quiz:categories' %}" class="btn">Boshlash</a>
+            </div>
+
+            <!-- 2-bo'lim: Umumiy Test -->
+            <div class="action-card">
+                <div class="action-icon">📝</div>
+                <h3>Umumiy Test</h3>
+                <p>Barcha kategoriyalardan 20 tadan savollar bilan ketma-ket variantlar ishlang. To'liq tayyorgarlik uchun</p>
+                <a href="{% url 'quiz:general_test' %}" class="btn">Boshlash</a>
+            </div>
+
+            <!-- 3-bo'lim: Biletlik Test -->
+            <div class="action-card">
+                <div class="action-icon">🎫</div>
+                <h3>Biletlik Test</h3>
+                <p>Tasodifiy tanlangan savollar bilan haqiqiy imtihon kabi test ishlang va bilimingizni tekshiring</p>
+                <a href="{% url 'quiz:tickets' %}" class="btn">Boshlash</a>
+            </div>
+        </div>
+
+        <!-- Qo'shimcha bo'limlar -->
+        <div class="action-cards" style="margin-top: 2rem;">
+            <div class="action-card">
+                <div class="action-icon">📊</div>
+                <h3>Statistika va Tahlil</h3>
+                <p>O'z natijalaringizni kuzatib boring, xatolaringizni tahlil qiling va taraqqiyotingizni ko'ring</p>
+                <a href="{% url 'quiz:statistics' %}" class="btn">Ko'rish</a>
             </div>
 
             <div class="action-card">
                 <div class="action-icon">📚</div>
-                <h3>Ko'proq ma'lumot</h3>
-                <p>Haydovchilik qoidalari va yo'l belgilari haqida batafsil o'rganing va bilimlaringizni mustahkamlang</p>
+                <h3>Ta'lim Materiallari</h3>
+                <p>Video darslar, matnli materiallar va rasmlar orqali yo'l harakati qoidalarini o'rganing</p>
                 <a href="{% url 'quiz:education' %}" class="btn">O'rganish</a>
+            </div>
+
+            <div class="action-card">
+                <div class="action-icon">🎯</div>
+                <h3>Tavsiyalar</h3>
+                <p>Test natijalaringiz asosida shaxsiy tavsiyalar oling va zaif joylaringizni yaxshilang</p>
+                <a href="{% url 'quiz:recommendations' %}" class="btn">Tavsiyalar</a>
             </div>
         </div>
 

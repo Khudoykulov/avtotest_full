@@ -936,3 +936,305 @@ def test_results_view(request, result_id):
     }
 
     return render(request, 'quiz/results.html', context)
+
+
+# Yangi view funksiyalar
+
+@login_required
+def category_test_view(request, category_id):
+    """Show all tests available for a specific category"""
+    category = get_object_or_404(Category, id=category_id)
+    questions_count = Question.objects.filter(category=category).count()
+    
+    # Generate test variants (20 questions each)
+    variants_count = max(1, questions_count // 20)
+    variants = []
+    for i in range(1, variants_count + 1):
+        variants.append({
+            'id': i,
+            'name': f"Variant {i}",
+            'questions_count': min(20, questions_count - (i-1) * 20)
+        })
+    
+    # User's previous results in this category
+    user_results = TestResult.objects.filter(
+        user=request.user,
+        category=category
+    ).order_by('-created_at')[:5]
+    
+    context = {
+        'category': category,
+        'variants': variants,
+        'questions_count': questions_count,
+        'user_results': user_results
+    }
+    return render(request, 'quiz/category_test.html', context)
+
+
+@login_required
+def take_category_test_view(request, category_id):
+    """Take a test for specific category"""
+    category = get_object_or_404(Category, id=category_id)
+    all_questions = list(Question.objects.filter(category=category))
+    
+    # Always select exactly 20 questions (first 20 or repeat if less)
+    if len(all_questions) >= 20:
+        questions = all_questions[:20]  # Take first 20
+    else:
+        # If less than 20, repeat questions to make 20
+        questions = []
+        while len(questions) < 20:
+            questions.extend(all_questions)
+        questions = questions[:20]
+    
+    context = {
+        'questions': questions,
+        'test_type': 'category',
+        'test_name': f"{category.name_uz} - Kategoriya Test",
+        'category_id': category_id,
+    }
+    return render(request, 'quiz/take_test.html', context)
+
+
+@login_required
+def general_test_view(request):
+    """Show general test variants page"""
+    total_questions = Question.objects.count()
+    variants_count = max(1, total_questions // 20)
+    
+    variants = []
+    for i in range(1, variants_count + 1):
+        start_index = (i - 1) * 20
+        end_index = min(i * 20, total_questions)
+        variants.append({
+            'id': i,
+            'name': f"Variant {i}",
+            'description': f"{start_index + 1}-{end_index} savollar",
+            'questions_count': end_index - start_index
+        })
+    
+    # User's previous general test results
+    user_results = TestResult.objects.filter(
+        user=request.user,
+        category__isnull=True,
+        ticket__isnull=True
+    ).order_by('-created_at')[:10]
+    
+    context = {
+        'variants': variants,
+        'total_questions': total_questions,
+        'user_results': user_results
+    }
+    return render(request, 'quiz/general_test.html', context)
+
+
+@login_required
+def take_general_test_view(request, variant_id):
+    """Take a general test with specific variant"""
+    total_questions = Question.objects.count()
+    start_index = (variant_id - 1) * 20
+    end_index = min(variant_id * 20, total_questions)
+    
+    # Get sequential questions for this variant (exactly 20)
+    all_questions = list(Question.objects.all())
+    if start_index < len(all_questions):
+        questions = all_questions[start_index:min(start_index + 20, len(all_questions))]
+        
+        # If less than 20, pad with more questions
+        if len(questions) < 20:
+            remaining = 20 - len(questions)
+            additional_questions = all_questions[:remaining]
+            questions.extend(additional_questions)
+    else:
+        # If variant goes beyond available questions, start from beginning
+        questions = all_questions[:20] if len(all_questions) >= 20 else all_questions
+    
+    if not questions:
+        return redirect('quiz:general_test')
+    
+    context = {
+        'questions': questions,
+        'test_type': 'general',
+        'test_name': f"Umumiy Test - Variant {variant_id}",
+        'variant_id': variant_id,
+    }
+    return render(request, 'quiz/take_test.html', context)
+
+
+@login_required
+def take_ticket_test_view(request, ticket_id):
+    """Take a specific ticket test"""
+    ticket = get_object_or_404(TestTicket, ticket_number=ticket_id)
+    all_ticket_questions = list(ticket.questions.all())
+    
+    # Ensure exactly 20 questions
+    if len(all_ticket_questions) >= 20:
+        questions = all_ticket_questions[:20]
+    else:
+        # If less than 20, add random questions from other categories
+        questions = all_ticket_questions.copy()
+        remaining = 20 - len(questions)
+        
+        # Get additional questions from all categories
+        additional_questions = list(Question.objects.exclude(
+            id__in=[q.id for q in all_ticket_questions]
+        )[:remaining])
+        questions.extend(additional_questions)
+        
+        # If still not enough, repeat existing questions
+        while len(questions) < 20:
+            questions.extend(all_ticket_questions)
+        questions = questions[:20]
+    
+    if not questions:
+        return redirect('quiz:tickets')
+    
+    context = {
+        'questions': questions,
+        'test_type': 'ticket',
+        'test_name': f"Bilet {ticket.ticket_number}",
+        'ticket_id': ticket_id,
+    }
+    return render(request, 'quiz/take_test.html', context)
+
+
+@login_required
+def analytics_view(request):
+    """Advanced analytics dashboard"""
+    user_results = TestResult.objects.filter(user=request.user)
+    
+    if not user_results.exists():
+        return redirect('quiz:categories')
+    
+    # Time-based analytics
+    from django.utils import timezone
+    now = timezone.now()
+    
+    # Last 30 days performance
+    thirty_days_ago = now - timedelta(days=30)
+    recent_results = user_results.filter(created_at__gte=thirty_days_ago)
+    
+    # Daily performance chart data
+    daily_performance = []
+    for i in range(30):
+        date = now.date() - timedelta(days=i)
+        day_results = recent_results.filter(created_at__date=date)
+        if day_results.exists():
+            daily_performance.append({
+                'date': date.strftime('%m-%d'),
+                'avg_score': round(day_results.aggregate(Avg('score'))['score__avg'], 1),
+                'tests_count': day_results.count()
+            })
+    
+    # Category breakdown
+    category_breakdown = {}
+    for category in Category.objects.all():
+        cat_results = user_results.filter(category=category)
+        if cat_results.exists():
+            category_breakdown[category.name_uz] = {
+                'total_tests': cat_results.count(),
+                'avg_score': round(cat_results.aggregate(Avg('score'))['score__avg'], 1),
+                'best_score': cat_results.aggregate(Max('score'))['score__max'],
+                'pass_rate': round(cat_results.filter(passed=True).count() / cat_results.count() * 100, 1)
+            }
+    
+    # Mistake analysis
+    wrong_answers = UserAnswer.objects.filter(
+        test_result__user=request.user,
+        is_correct=False
+    )
+    
+    common_mistakes = wrong_answers.values(
+        'question__question_text'
+    ).annotate(
+        mistake_count=Count('id')
+    ).order_by('-mistake_count')[:10]
+    
+    context = {
+        'daily_performance': daily_performance[-7:],  # Last 7 days
+        'category_breakdown': category_breakdown,
+        'common_mistakes': common_mistakes,
+        'total_tests': user_results.count(),
+        'total_mistakes': wrong_answers.count(),
+        'avg_score': round(user_results.aggregate(Avg('score'))['score__avg'], 1)
+    }
+    
+    return render(request, 'quiz/analytics.html', context)
+
+
+@login_required  
+def education_category_view(request, category_id):
+    """Show education materials for specific category"""
+    category = get_object_or_404(Category, id=category_id)
+    contents = EducationContent.objects.filter(category=category).order_by('order', 'created_at')
+    
+    # Get related questions count for this category
+    questions_count = Question.objects.filter(category=category).count()
+    
+    context = {
+        'category': category,
+        'contents': contents,
+        'questions_count': questions_count
+    }
+    return render(request, 'quiz/education_category.html', context)
+
+
+def calculate_progress_metrics(user, user_results):
+    """Calculate progress tracking metrics"""
+    from django.utils import timezone
+    now = timezone.now()
+    
+    # Weekly goal tracking
+    week_start = now - timedelta(days=now.weekday())
+    week_results = user_results.filter(created_at__gte=week_start)
+    
+    # Calculate consecutive days streak
+    consecutive_days = calculate_consecutive_days(user_results)
+    
+    # Determine next milestone
+    total_tests = user_results.count()
+    next_milestone = None
+    
+    if total_tests < 5:
+        next_milestone = {
+            'title': '5 ta test',
+            'description': 'Birinchi 5 ta testni tugatish',
+            'progress': (total_tests / 5) * 100
+        }
+    elif total_tests < 20:
+        next_milestone = {
+            'title': '20 ta test', 
+            'description': 'Tajribali foydalanuvchi bo\'lish',
+            'progress': (total_tests / 20) * 100
+        }
+    else:
+        next_milestone = {
+            'title': 'Ekspert daraja',
+            'description': 'A\'lo natijalarni saqlash',
+            'progress': 100
+        }
+    
+    # Motivation message
+    motivation_messages = {
+        0: "Birinchi qadamni qo'ying!",
+        1: "Yaxshi boshlandi!",
+        5: "Mukammal harakatlanmoqdasiz!",
+        10: "Siz haqiqiy o'quvchisiz!",
+        20: "Ekspert darajada!"
+    }
+    
+    closest_milestone = max([k for k in motivation_messages.keys() if k <= consecutive_days])
+    motivation_message = motivation_messages[closest_milestone]
+    
+    return {
+        'weekly_goal': {
+            'completed': week_results.count(),
+            'target': 5,
+            'progress': min(100, (week_results.count() / 5) * 100)
+        },
+        'next_milestone': next_milestone,
+        'motivation': {
+            'streak': consecutive_days,
+            'message': motivation_message
+        }
+    }

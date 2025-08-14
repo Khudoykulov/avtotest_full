@@ -12,10 +12,22 @@ class AnswerInline(admin.TabularInline):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('question_text', 'category', 'created_at')
+    list_display = ('get_short_question', 'category', 'answers_count', 'has_image', 'created_at')
     list_filter = ('category', 'created_at')
     search_fields = ('question_text',)
     inlines = [AnswerInline]
+    
+    def get_short_question(self, obj):
+        return obj.question_text[:50] + '...' if len(obj.question_text) > 50 else obj.question_text
+    get_short_question.short_description = 'Savol'
+    
+    def answers_count(self, obj):
+        return obj.answers.count()
+    answers_count.short_description = 'Javoblar soni'
+    
+    def has_image(self, obj):
+        return "✅ Ha" if obj.image else "❌ Yo'q"
+    has_image.short_description = 'Rasm'
 
 @admin.register(TestTicket)
 class TestTicketAdmin(admin.ModelAdmin):

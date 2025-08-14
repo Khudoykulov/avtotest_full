@@ -1,7 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from quiz.models import Category
-from .models import EducationContent
+from quiz.models import Category, EducationContent
 
 @login_required
 def education_view(request, category_id=None):
@@ -13,7 +12,7 @@ def education_view(request, category_id=None):
             'contents': contents
         })
     else:
-        categories = Category.objects.prefetch_related('education_materials').all()
+        categories = Category.objects.all()
         return render(request, 'education/index.html', {
             'categories': categories
         })

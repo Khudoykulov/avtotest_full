@@ -56,12 +56,15 @@
                     </div>
 
                     <div style="margin-bottom: 1rem;">
-                        <button onclick="previousQuestion()" class="btn btn-secondary" style="width: 48%; margin-right: 4%;">
-                            ← Oldingi
-                        </button>
-                        <button onclick="nextQuestion()" class="btn" style="width: 48%;">
-                            Keyingi →
-                        </button>
+                        <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 0.9rem; color: #1976d2; margin-bottom: 0.5rem;">PROGRESS</div>
+                            <div id="progress-bar" style="background: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div id="progress-fill" style="background: linear-gradient(90deg, #28a745, #20c997); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                            </div>
+                            <div style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">
+                                <span id="answered-count">0</span>/<span id="total-questions">{{ questions|length }}</span> javob berildi
+                            </div>
+                        </div>
                     </div>
 
                     <button onclick="finishTest()" class="btn" style="width: 100%; background: #28a745;">
@@ -73,21 +76,25 @@
     </div>
 </div>
 
-<!-- Sample Questions Data (In real app, this would come from backend) -->
+<!-- Real Questions Data from Backend -->
 <script>
 const questions = [
+    {% for question in questions %}
     {
-        id: 1,
-        text: "Agar piyodalar o'tish joyida tirbandlik vujudga kelib, haydovchini piyodalar o'tish joyida to'xtagaa majbur qilsa, haydovchi majbur:",
-        image: "/placeholder.svg?height=200&width=300",
+        id: {{ question.id }},
+        text: "{{ question.question_text|escapejs }}",
+        image: {% if question.image %}"{{ question.image.url }}"{% else %}null{% endif %},
         answers: [
-            { id: 1, text: "Piyodalar o'tish joyi oldidan 5 metr berida to'xtash", correct: false },
-            { id: 2, text: "Piyodalar o'tish joyi oldidan 15 metr berida to'xtash", correct: true },
-            { id: 3, text: "Oldinda turgan transport vositasidan zarar masofaa saqlangan holda piyodalar o'tish joyida to'xtash", correct: false },
-            { id: 4, text: "To'xtash va piyodalar o'tish joyiga o'tmaslikka, chunki bu piyodalarning xarakati uchun to'sqinlik qiladi", correct: false }
+            {% for answer in question.answers.all %}
+            {
+                id: {{ answer.id }},
+                text: "{{ answer.answer_text|escapejs }}",
+                correct: {{ answer.is_correct|yesno:"true,false" }}
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
         ]
-    }
-    // Add more questions here...
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
 ];
 
 let currentQuestionIndex = 0;
@@ -129,76 +136,239 @@ function loadQuestion(index) {
     `;
     
     // Update current question display
-    document.getElementById('current-question').textContent = `${index + 1}/20`;
+    document.getElementById('current-question').textContent = `${index + 1}/${questions.length}`;
     
-    // Restore previous answer if exists
+    // Restore previous answer if exists and show results
     if (userAnswers[question.id]) {
-        const radio = container.querySelector(`input[value="${userAnswers[question.id]}"]`);
-        if (radio) {
-            radio.checked = true;
-            radio.closest('label').style.borderColor = '#667eea';
-            radio.closest('label').style.background = '#f0f4ff';
-        }
+        const selectedAnswerId = userAnswers[question.id];
+        
+        // Show results for all answers
+        const labels = container.querySelectorAll('label');
+        labels.forEach(label => {
+            const input = label.querySelector('input');
+            const answer = question.answers.find(a => a.id == input.value);
+            
+            if (answer.correct) {
+                // Show correct answer in green
+                label.style.borderColor = '#28a745';
+                label.style.background = '#d4edda';
+                label.style.fontWeight = 'bold';
+                const icon = document.createElement('span');
+                icon.className = 'result-icon';
+                icon.innerHTML = ' ✅';
+                icon.style.color = '#28a745';
+                icon.style.fontSize = '1.2rem';
+                label.appendChild(icon);
+            } else if (input.value == selectedAnswerId) {
+                // Show selected wrong answer in red
+                label.style.borderColor = '#dc3545';
+                label.style.background = '#f8d7da';
+                label.style.fontWeight = 'bold';
+                input.checked = true;
+                const icon = document.createElement('span');
+                icon.className = 'result-icon';
+                icon.innerHTML = ' ❌';
+                icon.style.color = '#dc3545';
+                icon.style.fontSize = '1.2rem';
+                label.appendChild(icon);
+            } else {
+                // Other wrong answers in light gray
+                label.style.borderColor = '#e9ecef';
+                label.style.background = '#f8f9fa';
+                label.style.color = '#6c757d';
+            }
+            
+            // Disable all inputs
+            input.disabled = true;
+            label.style.cursor = 'not-allowed';
+        });
     }
 }
 
 function selectAnswer(questionId, answerId, element) {
     userAnswers[questionId] = answerId;
     
-    // Update visual feedback
+    // Get the current question
+    const question = questions.find(q => q.id == questionId);
+    const selectedAnswer = question.answers.find(a => a.id == answerId);
+    
+    // Update visual feedback for all answers
     const labels = element.parentNode.querySelectorAll('label');
     labels.forEach(label => {
-        label.style.borderColor = '#e9ecef';
-        label.style.background = 'white';
+        const input = label.querySelector('input');
+        const answer = question.answers.find(a => a.id == input.value);
+        
+        if (answer.correct) {
+            // Show correct answer in green
+            label.style.borderColor = '#28a745';
+            label.style.background = '#d4edda';
+            label.style.fontWeight = 'bold';
+            // Add checkmark
+            if (!label.querySelector('.result-icon')) {
+                const icon = document.createElement('span');
+                icon.className = 'result-icon';
+                icon.innerHTML = ' ✅';
+                icon.style.color = '#28a745';
+                icon.style.fontSize = '1.2rem';
+                label.appendChild(icon);
+            }
+        } else if (input.value == answerId) {
+            // Show selected wrong answer in red
+            label.style.borderColor = '#dc3545';
+            label.style.background = '#f8d7da';
+            label.style.fontWeight = 'bold';
+            // Add X mark
+            if (!label.querySelector('.result-icon')) {
+                const icon = document.createElement('span');
+                icon.className = 'result-icon';
+                icon.innerHTML = ' ❌';
+                icon.style.color = '#dc3545';
+                icon.style.fontSize = '1.2rem';
+                label.appendChild(icon);
+            }
+        } else {
+            // Other wrong answers in light gray
+            label.style.borderColor = '#e9ecef';
+            label.style.background = '#f8f9fa';
+            label.style.color = '#6c757d';
+        }
+        
+        // Disable all inputs after selection
+        input.disabled = true;
+        label.style.cursor = 'not-allowed';
     });
-    
-    element.style.borderColor = '#667eea';
-    element.style.background = '#f0f4ff';
     
     // Update question navigation button
     const navBtn = document.querySelector(`[data-question="${currentQuestionIndex + 1}"]`);
-    navBtn.style.background = '#667eea';
+    if (selectedAnswer.correct) {
+        navBtn.style.background = '#28a745';  // Green for correct
+        navBtn.innerHTML = `${currentQuestionIndex + 1} ✅`;
+    } else {
+        navBtn.style.background = '#dc3545';  // Red for incorrect  
+        navBtn.innerHTML = `${currentQuestionIndex + 1} ❌`;
+    }
     navBtn.style.color = 'white';
-    navBtn.style.borderColor = '#667eea';
+    navBtn.style.borderColor = selectedAnswer.correct ? '#28a745' : '#dc3545';
+    
+    // Update correct count in real-time
+    updateCorrectCount();
+    
+    // Auto-advance to next question after 2 seconds
+    setTimeout(() => {
+        if (currentQuestionIndex < questions.length - 1) {
+            nextQuestion();
+        }
+    }, 2000);
 }
 
 function nextQuestion() {
-    if (currentQuestionIndex < 19) {
+    if (currentQuestionIndex < questions.length - 1) {
         loadQuestion(currentQuestionIndex + 1);
         updateQuestionNavigation();
-    }
-}
-
-function previousQuestion() {
-    if (currentQuestionIndex > 0) {
-        loadQuestion(currentQuestionIndex - 1);
-        updateQuestionNavigation();
+    } else {
+        // All questions answered, show finish button prominently
+        const finishBtn = document.querySelector('button[onclick="finishTest()"]');
+        finishBtn.style.animation = 'pulse 2s infinite';
+        finishBtn.style.background = '#dc3545';
+        finishBtn.innerHTML = '🎯 Testni YAKUNLASH!';
     }
 }
 
 function updateQuestionNavigation() {
     const buttons = document.querySelectorAll('.question-nav-btn');
     buttons.forEach((btn, index) => {
-        btn.onclick = () => {
-            loadQuestion(index);
-            updateQuestionNavigation();
-        };
-        
-        // Highlight current question
-        if (index === currentQuestionIndex) {
-            btn.style.background = '#764ba2';
-            btn.style.color = 'white';
-            btn.style.borderColor = '#764ba2';
-        } else if (userAnswers[index + 1]) {
-            btn.style.background = '#667eea';
-            btn.style.color = 'white';
-            btn.style.borderColor = '#667eea';
-        } else {
-            btn.style.background = 'white';
-            btn.style.color = '#333';
-            btn.style.borderColor = '#dee2e6';
+        // Only process first 20 buttons and existing questions
+        if (index < 20) {
+            const question = questions[index];
+            
+            if (!question) {
+                // No question for this slot
+                btn.onclick = null;
+                btn.style.background = '#f8f9fa';
+                btn.style.color = '#6c757d';
+                btn.style.borderColor = '#e9ecef';
+                btn.style.transform = 'scale(1)';
+                btn.style.cursor = 'not-allowed';
+                btn.innerHTML = `${index + 1}`;
+                return;
+            }
+            
+            const isAnswered = userAnswers[question.id];
+            
+            // Only allow clicking on current question or answered questions
+            if (index === currentQuestionIndex) {
+                btn.onclick = null; // Current question - no need to click
+                btn.style.background = '#dc3545';
+                btn.style.color = 'white';
+                btn.style.borderColor = '#dc3545';
+                btn.style.transform = 'scale(1.1)';
+                btn.style.cursor = 'default';
+                btn.innerHTML = `${index + 1}`;
+            } else if (isAnswered) {
+                // Answered questions - show result but no clicking
+                btn.onclick = null;
+                const selectedAnswer = question.answers.find(a => a.id == isAnswered);
+                const isCorrect = selectedAnswer && selectedAnswer.correct;
+                
+                btn.style.background = isCorrect ? '#28a745' : '#dc3545';
+                btn.style.color = 'white';
+                btn.style.borderColor = isCorrect ? '#28a745' : '#dc3545';
+                btn.style.transform = 'scale(1)';
+                btn.style.cursor = 'default';
+                btn.innerHTML = `${index + 1} ${isCorrect ? '✅' : '❌'}`;
+            } else if (index < currentQuestionIndex) {
+                // Previous unanswered questions - locked
+                btn.onclick = null;
+                btn.style.background = '#6c757d';
+                btn.style.color = 'white';
+                btn.style.borderColor = '#6c757d';
+                btn.style.transform = 'scale(1)';
+                btn.style.cursor = 'not-allowed';
+                btn.innerHTML = `${index + 1} 🔒`;
+            } else {
+                // Future questions - disabled
+                btn.onclick = null;
+                btn.style.background = '#e9ecef';
+                btn.style.color = '#6c757d';
+                btn.style.borderColor = '#dee2e6';
+                btn.style.transform = 'scale(1)';
+                btn.style.cursor = 'not-allowed';
+                btn.innerHTML = `${index + 1}`;
+            }
         }
     });
+}
+
+function updateCorrectCount() {
+    // Calculate correct answers in real-time
+    let correctCount = 0;
+    Object.entries(userAnswers).forEach(([questionId, answerId]) => {
+        const question = questions.find(q => q.id == questionId);
+        if (question) {
+            const answer = question.answers.find(a => a.id == answerId);
+            if (answer && answer.correct) {
+                correctCount++;
+            }
+        }
+    });
+    
+    // Update correct count display
+    document.getElementById('correct-count').textContent = correctCount;
+    
+    // Update progress
+    updateProgress();
+}
+
+function updateProgress() {
+    const answeredCount = Object.keys(userAnswers).length;
+    const totalQuestions = questions.length;
+    const progressPercentage = (answeredCount / totalQuestions) * 100;
+    
+    // Update progress bar
+    document.getElementById('progress-fill').style.width = `${progressPercentage}%`;
+    
+    // Update answered count text
+    document.getElementById('answered-count').textContent = answeredCount;
 }
 
 function startTimer() {
@@ -220,44 +390,199 @@ function finishTest() {
     clearInterval(timerInterval);
     
     const answeredCount = Object.keys(userAnswers).length;
-    if (answeredCount < 20) {
-        if (!confirm(`Siz ${answeredCount}/20 ta savolga javob berdingiz. Testni yakunlashni xohlaysizmi?`)) {
+    if (answeredCount < questions.length) {
+        if (!confirm(`Siz ${answeredCount}/${questions.length} ta savolga javob berdingiz. Testni yakunlashni xohlaysizmi?`)) {
             return;
         }
     }
     
-    // Calculate results (simplified)
-    let correctCount = 0;
-    Object.entries(userAnswers).forEach(([questionId, answerId]) => {
-        const question = questions.find(q => q.id == questionId);
-        if (question) {
-            const answer = question.answers.find(a => a.id == answerId);
-            if (answer && answer.correct) {
-                correctCount++;
+    // Show loading
+    const container = document.getElementById('question-container');
+    container.innerHTML = `
+        <div style="text-align: center; padding: 3rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
+            <h2>Test natijasi hisoblanmoqda...</h2>
+            <div style="margin-top: 2rem;">
+                <div style="width: 200px; height: 4px; background: #e9ecef; margin: 0 auto; border-radius: 2px; overflow: hidden;">
+                    <div style="width: 0%; height: 100%; background: #28a745; transition: width 2s;" id="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Animate progress bar
+    setTimeout(() => {
+        document.getElementById('progress-bar').style.width = '100%';
+    }, 100);
+    
+    // Calculate results after delay for better UX
+    setTimeout(() => {
+        let correctCount = 0;
+        let incorrectAnswers = [];
+        
+        // Check all answers
+        Object.entries(userAnswers).forEach(([questionId, answerId]) => {
+            const question = questions.find(q => q.id == questionId);
+            if (question) {
+                const answer = question.answers.find(a => a.id == answerId);
+                if (answer && answer.correct) {
+                    correctCount++;
+                } else {
+                    incorrectAnswers.push({
+                        question: question.text,
+                        selectedAnswer: answer ? answer.text : 'Tanlanmagan',
+                        correctAnswer: question.answers.find(a => a.correct).text
+                    });
+                }
             }
+        });
+        
+        // Update correct count display
+        document.getElementById('correct-count').textContent = correctCount;
+        
+        // Calculate percentage
+        const percentage = Math.round((correctCount / questions.length) * 100);
+        const passed = percentage >= 70;
+        
+        // Show detailed results
+        showTestResults(correctCount, percentage, passed, incorrectAnswers);
+        
+    }, 2000);
+}
+
+function showTestResults(correctCount, percentage, passed, incorrectAnswers) {
+    const container = document.getElementById('question-container');
+    
+    container.innerHTML = `
+        <div style="text-align: center; padding: 2rem;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">
+                ${passed ? '🎉' : '😞'}
+            </div>
+            
+            <h1 style="color: ${passed ? '#28a745' : '#dc3545'}; margin-bottom: 1rem;">
+                ${passed ? 'TABRIKLAYMIZ!' : 'AFSUSKI...'}
+            </h1>
+            
+            <div style="background: ${passed ? '#d4edda' : '#f8d7da'}; 
+                        border: 2px solid ${passed ? '#28a745' : '#dc3545'}; 
+                        border-radius: 12px; padding: 2rem; margin-bottom: 2rem;">
+                <h2 style="margin: 0; color: ${passed ? '#155724' : '#721c24'};">
+                    ${passed ? 'Siz testdan muvaffaqiyatli o\'tdingiz!' : 'Test topshirilmadi'}
+                </h2>
+                <div style="font-size: 2rem; margin: 1rem 0; font-weight: bold;">
+                    ${correctCount}/${questions.length} (${percentage}%)
+                </div>
+                <p style="margin: 0; color: ${passed ? '#155724' : '#721c24'};">
+                    ${passed ? 'O\'tish uchun zarur: 70%' : 'Qayta urinib ko\'ring. O\'tish uchun zarur: 70%'}
+                </p>
+            </div>
+            
+            ${incorrectAnswers.length > 0 ? `
+                <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; text-align: left;">
+                    <h3 style="color: #856404; margin-bottom: 1rem; text-align: center;">⚠️ Xato javoblar:</h3>
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        ${incorrectAnswers.slice(0, 5).map((item, index) => `
+                            <div style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: 8px;">
+                                <strong>Savol ${index + 1}:</strong> ${item.question.substring(0, 100)}...
+                                <br><span style="color: #dc3545;">❌ Sizning javobingiz:</span> ${item.selectedAnswer}
+                                <br><span style="color: #28a745;">✅ To'g'ri javob:</span> ${item.correctAnswer}
+                            </div>
+                        `).join('')}
+                        ${incorrectAnswers.length > 5 ? `<p style="text-align: center; color: #856404;">va yana ${incorrectAnswers.length - 5} ta xato...</p>` : ''}
+                    </div>
+                </div>
+            ` : ''}
+            
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button onclick="window.location.href='{% url 'quiz:statistics' %}'" 
+                        class="btn" style="background: #17a2b8; color: white; padding: 1rem 2rem;">
+                    📊 Statistikani ko'rish
+                </button>
+                <button onclick="window.location.href='{% url 'home' %}'" 
+                        class="btn" style="background: #6c757d; color: white; padding: 1rem 2rem;">
+                    🏠 Bosh sahifa
+                </button>
+                <button onclick="location.reload()" 
+                        class="btn" style="background: #28a745; color: white; padding: 1rem 2rem;">
+                    🔄 Qayta urinish
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Submit test results to backend
+    submitTestResults(correctCount, percentage, passed);
+}
+
+function submitTestResults(correctCount, percentage, passed) {
+    const testData = {
+        answers: userAnswers,
+        score: correctCount,
+        total_questions: questions.length,
+        time_taken: 1200 - timeLeft,
+        test_type: '{{ test_type }}',
+        {% if ticket_id %}ticket_id: {{ ticket_id }},{% endif %}
+        {% if category_id %}category_id: {{ category_id }},{% endif %}
+        {% if variant_id %}variant_id: {{ variant_id }},{% endif %}
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+    };
+    
+    fetch('{% url "quiz:submit_test" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(testData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.result_id) {
+            // Optionally redirect to detailed results page
+            // window.location.href = `/quiz/results/${data.result_id}/`;
         }
+    })
+    .catch(error => {
+        console.error('Error submitting test:', error);
     });
-    
-    // Update correct count display
-    document.getElementById('correct-count').textContent = correctCount;
-    
-    // Show results
-    const passed = correctCount >= 14;
-    const resultMessage = passed ? 
-        `Tabriklaymiz! Siz testdan o'tdingiz. Natija: ${correctCount}/20` :
-        `Afsuski, test topshirilmadi. Natija: ${correctCount}/20. Qayta urinib ko'ring.`;
-    
-    alert(resultMessage);
-    
-    // Redirect to results or home
-    window.location.href = "{% url 'home' %}";
 }
 </script>
 
 <style>
+.question-nav-btn {
+    transition: all 0.3s ease !important;
+}
+
 .question-nav-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.question-nav-btn.current {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+}
+
+.question-nav-btn.answered {
+    animation: none;
+    box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3);
+}
+
+label:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+.test-progress {
+    background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
+    height: 6px;
+    border-radius: 3px;
+    transition: width 0.3s ease;
 }
 
 @media (max-width: 768px) {
@@ -268,6 +593,11 @@ function finishTest() {
     
     #question-grid {
         grid-template-columns: repeat(5, 1fr) !important;
+    }
+    
+    .btn {
+        font-size: 0.9rem !important;
+        padding: 0.7rem 1.5rem !important;
     }
 }
 </style>

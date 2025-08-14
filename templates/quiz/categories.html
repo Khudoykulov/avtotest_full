@@ -28,7 +28,7 @@
             Barcha mavzulardan tuzilgan professional variantlar. Har bir 
             variant 20ta savoldan iborat va ketma-ket tartibda beriladi.
         </p>
-        <a href="{% url 'quiz:tickets' %}" class="btn">Variantlarni boshlash</a>
+        <a href="{% url 'quiz:general_test' %}" class="btn">Variantlarni boshlash</a>
     </div>
 </div>
 
@@ -40,47 +40,18 @@
         </p>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+            {% for category in categories %}
             <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; text-align: center; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
-                <div style="font-size: 2.5rem; margin-bottom: 1rem;">🚦</div>
-                <h3 style="color: #333; margin-bottom: 0.5rem;">Yo'l qoidalari</h3>
-                <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">156 ta savol mavjud</p>
-                <a href="{% url 'quiz:take_category_test' 1 %}" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Testni boshlash</a>
+                <div style="font-size: 2.5rem; margin-bottom: 1rem;">{{ category.icon|default:"📋" }}</div>
+                <h3 style="color: #333; margin-bottom: 0.5rem;">{{ category.name_uz }}</h3>
+                <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">{{ category.question_count }} ta savol mavjud</p>
+                <a href="{% url 'quiz:category_test' category.id %}" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Kategoriyaga kirish</a>
             </div>
-
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; text-align: center; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
-                <div style="font-size: 2.5rem; margin-bottom: 1rem;">🛑</div>
-                <h3 style="color: #333; margin-bottom: 0.5rem;">Yo'l belgilari</h3>
-                <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">89 ta savol mavjud</p>
-                <a href="{% url 'quiz:take_category_test' 2 %}" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Testni boshlash</a>
+            {% empty %}
+            <div style="grid-column: 1/-1; text-align: center; color: #6c757d; padding: 2rem;">
+                <p>Hali kategoriyalar qo'shilmagan.</p>
             </div>
-
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; text-align: center; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
-                <div style="font-size: 2.5rem; margin-bottom: 1rem;">🏥</div>
-                <h3 style="color: #333; margin-bottom: 0.5rem;">Birinchi yordam</h3>
-                <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">45 ta savol mavjud</p>
-                <a href="{% url 'quiz:take_category_test' 3 %}" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Testni boshlash</a>
-            </div>
-
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; text-align: center; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
-                <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔧</div>
-                <h3 style="color: #333; margin-bottom: 0.5rem;">Texnik ko'rik</h3>
-                <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">67 ta savol mavjud</p>
-                <a href="{% url 'quiz:take_category_test' 4 %}" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Testni boshlash</a>
-            </div>
-
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; text-align: center; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
-                <div style="font-size: 2.5rem; margin-bottom: 1rem;">🌱</div>
-                <h3 style="color: #333; margin-bottom: 0.5rem;">Atrof muhit himoyasi</h3>
-                <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">23 ta savol mavjud</p>
-                <a href="{% url 'quiz:take_category_test' 5 %}" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Testni boshlash</a>
-            </div>
-
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; text-align: center; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
-                <div style="font-size: 2.5rem; margin-bottom: 1rem;">⚖️</div>
-                <h3 style="color: #333; margin-bottom: 0.5rem;">Jarimalar va jazolar</h3>
-                <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">34 ta savol mavjud</p>
-                <a href="{% url 'quiz:take_category_test' 6 %}" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Testni boshlash</a>
-            </div>
+            {% endfor %}
         </div>
     </div>
 </div>

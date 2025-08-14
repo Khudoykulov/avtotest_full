@@ -536,18 +536,51 @@ function showTestResults(correctCount, percentage, passed, incorrectAnswers) {
                 </div>
             ` : ''}
             
-            <div style="display: flex; gap: 1rem; justify-content: center;">
+            <!-- Bu test uchun maxsus tavsiyalar -->
+            <div style="background: #e3f2fd; border: 2px solid #2196f3; border-radius: 12px; padding: 2rem; margin: 2rem 0;">
+                <h3 style="color: #1976d2; margin: 0 0 1rem 0; text-align: center;">🎯 Ushbu test uchun tavsiyalar</h3>
+                <div id="test-recommendations" style="text-align: center; color: #666;">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">⏳</div>
+                    <p>AI sizning natijangizni tahlil qilmoqda...</p>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem;" class="action-buttons">
+                <button onclick="showTestAnalysis()" 
+                        class="btn" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1.5rem; border-radius: 12px; border: none; cursor: pointer; font-size: 1.1rem; font-weight: bold; transition: all 0.3s;">
+                    🤖 AI Tahlili
+                    <small style="display: block; margin-top: 0.5rem; opacity: 0.9; font-weight: normal;">Bu test uchun maxsus</small>
+                </button>
+                
                 <button onclick="window.location.href='{% url 'quiz:statistics' %}'" 
-                        class="btn" style="background: #17a2b8; color: white; padding: 1rem 2rem;">
-                    📊 Statistikani ko'rish
+                        class="btn" style="background: #17a2b8; color: white; padding: 1.5rem; border-radius: 12px; border: none; cursor: pointer; font-size: 1.1rem; font-weight: bold; transition: all 0.3s;">
+                    📊 Umumiy Statistika
+                    <small style="display: block; margin-top: 0.5rem; opacity: 0.9; font-weight: normal;">Barcha testlar</small>
                 </button>
-                <button onclick="window.location.href='{% url 'home' %}'" 
-                        class="btn" style="background: #6c757d; color: white; padding: 1rem 2rem;">
-                    🏠 Bosh sahifa
+                
+                <button onclick="window.location.href='{% url 'quiz:ai_analytics' %}'" 
+                        class="btn" style="background: #28a745; color: white; padding: 1.5rem; border-radius: 12px; border: none; cursor: pointer; font-size: 1.1rem; font-weight: bold; transition: all 0.3s;">
+                    🧠 AI Statistik
+                    <small style="display: block; margin-top: 0.5rem; opacity: 0.9; font-weight: normal;">Umumiy tahlil</small>
                 </button>
+                
                 <button onclick="location.reload()" 
-                        class="btn" style="background: #28a745; color: white; padding: 1rem 2rem;">
-                    🔄 Qayta urinish
+                        class="btn" style="background: #ffc107; color: #333; padding: 1.5rem; border-radius: 12px; border: none; cursor: pointer; font-size: 1.1rem; font-weight: bold; transition: all 0.3s;">
+                    🔄 Qayta Urinish
+                    <small style="display: block; margin-top: 0.5rem; opacity: 0.8; font-weight: normal;">Bu testni qayta</small>
+                </button>
+                
+                <button onclick="window.location.href='{% url 'home' %}'" 
+                        class="btn" style="background: #6c757d; color: white; padding: 1.5rem; border-radius: 12px; border: none; cursor: pointer; font-size: 1.1rem; font-weight: bold; transition: all 0.3s;">
+                    🏠 Bosh Sahifa
+                    <small style="display: block; margin-top: 0.5rem; opacity: 0.9; font-weight: normal;">Asosiy menyu</small>
+                </button>
+                
+                <button onclick="window.location.href='{% url 'quiz:categories' %}'" 
+                        class="btn" style="background: #dc3545; color: white; padding: 1.5rem; border-radius: 12px; border: none; cursor: pointer; font-size: 1.1rem; font-weight: bold; transition: all 0.3s;">
+                    📚 Boshqa Testlar
+                    <small style="display: block; margin-top: 0.5rem; opacity: 0.9; font-weight: normal;">Davom eting</small>
                 </button>
             </div>
         </div>
@@ -555,6 +588,9 @@ function showTestResults(correctCount, percentage, passed, incorrectAnswers) {
     
     // Submit test results to backend
     submitTestResults(correctCount, percentage, passed);
+    
+    // Get AI recommendations for this specific test
+    getTestSpecificRecommendations(correctCount, incorrectAnswers);
 }
 
 function submitTestResults(correctCount, percentage, passed) {
@@ -588,6 +624,113 @@ function submitTestResults(correctCount, percentage, passed) {
     .catch(error => {
         console.error('Error submitting test:', error);
     });
+}
+
+function getTestSpecificRecommendations(correctCount, incorrectAnswers) {
+    // Ushbu test uchun maxsus tavsiyalar olish
+    const testData = {
+        correct_count: correctCount,
+        total_questions: questions.length,
+        incorrect_answers: incorrectAnswers,
+        test_type: '{{ test_type }}',
+        {% if category_id %}category_id: {{ category_id }},{% endif %}
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+    };
+    
+    fetch('/quiz/get-test-recommendations/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(testData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayTestRecommendations(data.recommendations);
+        } else {
+            showGenericRecommendations(correctCount);
+        }
+    })
+    .catch(error => {
+        console.error('Error getting recommendations:', error);
+        showGenericRecommendations(correctCount);
+    });
+}
+
+function displayTestRecommendations(recommendations) {
+    const container = document.getElementById('test-recommendations');
+    
+    if (recommendations && recommendations.length > 0) {
+        container.innerHTML = `
+            <div style="text-align: left;">
+                ${recommendations.map(rec => `
+                    <div style="background: white; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; border-left: 4px solid ${rec.priority === 'high' ? '#dc3545' : rec.priority === 'medium' ? '#ffc107' : '#28a745'};">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <span style="font-size: 1.2rem;">${rec.icon || '💡'}</span>
+                            <strong style="color: #333;">${rec.title}</strong>
+                        </div>
+                        <p style="margin: 0; color: #666; font-size: 0.9rem;">${rec.description}</p>
+                        ${rec.action_url ? `<a href="${rec.action_url}" style="display: inline-block; margin-top: 0.5rem; background: #667eea; color: white; padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; font-size: 0.8rem;">Ko'rish →</a>` : ''}
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } else {
+        showGenericRecommendations(correctCount);
+    }
+}
+
+function showGenericRecommendations(correctCount) {
+    const container = document.getElementById('test-recommendations');
+    const percentage = (correctCount / questions.length) * 100;
+    
+    let recommendation = '';
+    if (percentage >= 85) {
+        recommendation = `
+            <div style="text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">🏆</div>
+                <h4 style="color: #28a745; margin: 0 0 0.5rem 0;">A'lo natija!</h4>
+                <p style="margin: 0; color: #666;">Siz juda yaxshi tayyorgarlik ko'rgansiz. Davom eting!</p>
+            </div>
+        `;
+    } else if (percentage >= 70) {
+        recommendation = `
+            <div style="text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">👍</div>
+                <h4 style="color: #ffc107; margin: 0 0 0.5rem 0;">Yaxshi natija!</h4>
+                <p style="margin: 0; color: #666;">Xato qilgan mavzularni takrorlang va yanada yaxshi natijaga erishing!</p>
+            </div>
+        `;
+    } else {
+        recommendation = `
+            <div style="text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">📚</div>
+                <h4 style="color: #dc3545; margin: 0 0 0.5rem 0;">Ko'proq o'rganish kerak</h4>
+                <p style="margin: 0; color: #666;">Ta'lim materiallarini ko'rib chiqing va ko'proq amaliyot qiling.</p>
+            </div>
+        `;
+    }
+    
+    container.innerHTML = recommendation;
+}
+
+function showTestAnalysis() {
+    // Bu test uchun maxsus AI tahlil sahifasiga o'tish
+    const testData = {
+        questions: questions,
+        userAnswers: userAnswers,
+        testType: '{{ test_type }}',
+        {% if category_id %}categoryId: {{ category_id }},{% endif %}
+        {% if ticket_id %}ticketId: {{ ticket_id }},{% endif %}
+    };
+    
+    // Test ma'lumotlarini localStorage ga saqlash
+    localStorage.setItem('currentTestData', JSON.stringify(testData));
+    
+    // AI tahlil sahifasiga o'tish
+    window.location.href = '/quiz/ai-analytics/?from_test=true';
 }
 </script>
 
@@ -642,6 +785,19 @@ label:hover {
         font-size: 0.9rem !important;
         padding: 0.7rem 1.5rem !important;
     }
+}
+
+.action-buttons button {
+    transition: all 0.3s ease !important;
+}
+
+.action-buttons button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.action-buttons button:active {
+    transform: translateY(-1px);
 }
 </style>
 {% endblock %}

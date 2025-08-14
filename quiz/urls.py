@@ -21,6 +21,7 @@ urlpatterns = [
     
     # Test yakunlash va natijalar
     path('submit-test/', views.submit_test_view, name='submit_test'),
+    path('get-test-recommendations/', views.get_test_recommendations_view, name='get_test_recommendations'),
     path('results/<int:result_id>/', views.test_results_view, name='test_results'),
     
     # Statistika va tahlil

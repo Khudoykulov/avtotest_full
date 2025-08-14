@@ -61,6 +61,9 @@
         </div>
     </div>
 
+    <!-- Test-specific analysis (if coming from test) -->
+    <div id="test-specific-analysis" style="display: none; margin-bottom: 2rem;"></div>
+
     <!-- AI Analysis -->
     <div class="card ai-analysis" style="margin-bottom: 2rem;">
         <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e9ecef;">
@@ -69,7 +72,7 @@
             </div>
             <div>
                 <h2 style="margin: 0; color: #333;">AI Tahlili</h2>
-                <p style="margin: 0; color: #6c757d;">Gemini AI sizning xatolaringizni tahlil qildi</p>
+                <p style="margin: 0; color: #6c757d;" id="ai-analysis-subtitle">Gemini AI sizning xatolaringizni tahlil qildi</p>
             </div>
         </div>
 
@@ -231,8 +234,14 @@
 </style>
 
 <script>
-// AI text animation
+// AI text animation and test-specific analysis
 document.addEventListener('DOMContentLoaded', function() {
+    // Check if coming from test
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('from_test') === 'true') {
+        showTestSpecificAnalysis();
+    }
+    
     const aiText = document.getElementById('ai-text');
     if (aiText) {
         const text = aiText.textContent;
@@ -248,5 +257,89 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 20);
     }
 });
+
+function showTestSpecificAnalysis() {
+    const testData = localStorage.getItem('currentTestData');
+    
+    if (testData) {
+        try {
+            const data = JSON.parse(testData);
+            const container = document.getElementById('test-specific-analysis');
+            
+            // Calculate test stats
+            const totalQuestions = data.questions.length;
+            const userAnswers = data.userAnswers || {};
+            
+            let correctCount = 0;
+            let incorrectQuestions = [];
+            
+            data.questions.forEach(question => {
+                if (userAnswers[question.id]) {
+                    const selectedAnswerId = userAnswers[question.id];
+                    const selectedAnswer = question.answers.find(a => a.id == selectedAnswerId);
+                    
+                    if (selectedAnswer && selectedAnswer.correct) {
+                        correctCount++;
+                    } else {
+                        incorrectQuestions.push(question);
+                    }
+                }
+            });
+            
+            const percentage = Math.round((correctCount / totalQuestions) * 100);
+            
+            // Show test-specific analysis
+            container.innerHTML = `
+                <div class="card" style="background: linear-gradient(135deg, #28a745, #20c997); color: white;">
+                    <h2 style="margin: 0 0 1rem 0; display: flex; align-items: center;">
+                        <span style="margin-right: 0.5rem;">🎯</span>
+                        Ushbu Test Tahlili
+                    </h2>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                        <div style="background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">${correctCount}</div>
+                            <div>To'g'ri javoblar</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">${totalQuestions - correctCount}</div>
+                            <div>Xato javoblar</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">${percentage}%</div>
+                            <div>Natija</div>
+                        </div>
+                    </div>
+                    
+                    ${incorrectQuestions.length > 0 ? `
+                        <div style="background: rgba(255,255,255,0.15); padding: 1.5rem; border-radius: 8px;">
+                            <h3 style="margin: 0 0 1rem 0;">❌ Xato qilgan savollar:</h3>
+                            <div style="max-height: 200px; overflow-y: auto;">
+                                ${incorrectQuestions.slice(0, 5).map((q, index) => `
+                                    <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 6px; margin-bottom: 0.5rem;">
+                                        <strong>Savol ${index + 1}:</strong> ${q.text.substring(0, 80)}...
+                                    </div>
+                                `).join('')}
+                                ${incorrectQuestions.length > 5 ? `<p style="text-align: center; margin: 1rem 0 0 0;">va yana ${incorrectQuestions.length - 5} ta xato...</p>` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            
+            container.style.display = 'block';
+            
+            // Update subtitle
+            document.getElementById('ai-analysis-subtitle').textContent = 
+                'Bu test uchun maxsus AI tahlili va umumiy statistikangiz';
+            
+            // Clear test data from localStorage
+            localStorage.removeItem('currentTestData');
+            
+        } catch (error) {
+            console.error('Error parsing test data:', error);
+        }
+    }
+}
 </script>
 {% endblock %}

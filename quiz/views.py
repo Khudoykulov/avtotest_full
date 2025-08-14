@@ -1401,3 +1401,103 @@ def ai_analytics_view(request):
         }
     
     return render(request, 'quiz/ai_analytics.html', context)
+
+
+@login_required
+def get_test_recommendations_view(request):
+    """Test tugagandan keyin maxsus tavsiyalar berish"""
+    if request.method == 'POST':
+        try:
+            import json
+            data = json.loads(request.body)
+            
+            correct_count = data.get('correct_count', 0)
+            total_questions = data.get('total_questions', 20)
+            incorrect_answers = data.get('incorrect_answers', [])
+            test_type = data.get('test_type', '')
+            category_id = data.get('category_id')
+            
+            recommendations = []
+            
+            # Natija darajasiga qarab tavsiyalar
+            percentage = (correct_count / total_questions) * 100
+            
+            if percentage >= 90:
+                recommendations.append({
+                    'title': 'Mukammal natija!',
+                    'description': 'Siz bu mavzuni juda yaxshi bilasiz. Boshqa mavzularni ham sinab ko\'ring.',
+                    'priority': 'low',
+                    'icon': '🏆',
+                    'action_url': '/quiz/categories/'
+                })
+            elif percentage >= 80:
+                recommendations.append({
+                    'title': 'Yaxshi natija!',
+                    'description': 'Bir necha xatoliklar mavjud. Ularni takrorlang.',
+                    'priority': 'medium',
+                    'icon': '👍',
+                    'action_url': '/quiz/education/'
+                })
+            elif percentage >= 70:
+                recommendations.append({
+                    'title': 'O\'rtacha natija',
+                    'description': 'Bilimlaringizni mustahkamlash zarur. Ta\'lim materiallarini ko\'ring.',
+                    'priority': 'high',
+                    'icon': '📚',
+                    'action_url': '/quiz/education/'
+                })
+            else:
+                recommendations.append({
+                    'title': 'Ko\'proq o\'rganish kerak',
+                    'description': 'Asosiy qoidalarni qayta o\'rganing. Sizga maxsus rejim tavsiya etiladi.',
+                    'priority': 'high',
+                    'icon': '⚠️',
+                    'action_url': '/quiz/education/'
+                })
+            
+            # Kategoriya bo'yicha maxsus tavsiya
+            if category_id:
+                try:
+                    category = Category.objects.get(id=category_id)
+                    education_materials = EducationContent.objects.filter(
+                        category=category
+                    ).order_by('order')[:2]
+                    
+                    if education_materials.exists():
+                        recommendations.append({
+                            'title': f'{category.name_uz} bo\'yicha qo\'shimcha o\'rganish',
+                            'description': f'Bu mavzu bo\'yicha video va matn materiallarini ko\'ring.',
+                            'priority': 'medium',
+                            'icon': '🎯',
+                            'action_url': f'/quiz/education/{category.id}/'
+                        })
+                except Category.DoesNotExist:
+                    pass
+            
+            # Umumiy tavsiyalar
+            if len(incorrect_answers) > 5:
+                recommendations.append({
+                    'title': 'AI Statistik tahlilini ko\'ring',
+                    'description': 'Barcha xatolaringiz tahlil qilinadi va maxsus maslahatlar beriladi.',
+                    'priority': 'high',
+                    'icon': '🤖',
+                    'action_url': '/quiz/ai-analytics/'
+                })
+            
+            return JsonResponse({
+                'success': True,
+                'recommendations': recommendations[:3],  # Maksimal 3 ta
+                'test_stats': {
+                    'percentage': round(percentage, 1),
+                    'correct': correct_count,
+                    'total': total_questions
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            })
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})

@@ -25,6 +25,8 @@ urlpatterns = [
     
     # Statistika va tahlil
     path('statistics/', views.statistics_view, name='statistics'),
+    path('detailed-statistics/', views.detailed_statistics_view, name='detailed_statistics'),
+    path('ai-analytics/', views.ai_analytics_view, name='ai_analytics'),
     path('analytics/', views.analytics_view, name='analytics'),
     
     # Ta'lim materiallari

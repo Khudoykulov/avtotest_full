@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.db.models import Avg, Count, Q, Max
 from django.db.models.functions import TruncDate
 from .models import Category, TestTicket, Question, TestResult, UserAnswer, EducationContent
+from .ai_analytics import get_ai_insights_for_user
 import json
 from datetime import timedelta, datetime
 from random import sample
@@ -1238,3 +1239,165 @@ def calculate_progress_metrics(user, user_results):
             'message': motivation_message
         }
     }
+
+
+def generate_detailed_analytics(user):
+    """Generate detailed analytics with education recommendations"""
+    from .models import EducationContent, Category, UserAnswer
+    
+    results = TestResult.objects.filter(user=user).order_by('-created_at')
+    
+    if not results.exists():
+        return {
+            'total_tests': 0,
+            'avg_score': 0,
+            'category_analysis': [],
+            'recommendations': [],
+            'progress_trend': 'no_data'
+        }
+    
+    # Basic stats
+    total_tests = results.count()
+    avg_score = results.aggregate(Avg('score'))['score__avg'] or 0
+    last_5_avg = results[:5].aggregate(Avg('score'))['score__avg'] or 0
+    
+    # Category analysis with errors
+    incorrect_answers = UserAnswer.objects.filter(
+        test_result__in=results,
+        is_correct=False
+    ).select_related('question__category')
+    
+    category_errors = {}
+    total_questions_by_category = {}
+    
+    # Count errors and total questions by category
+    for answer in UserAnswer.objects.filter(test_result__in=results).select_related('question__category'):
+        category = answer.question.category
+        if category not in category_errors:
+            category_errors[category] = 0
+            total_questions_by_category[category] = 0
+        
+        total_questions_by_category[category] += 1
+        if not answer.is_correct:
+            category_errors[category] += 1
+    
+    # Calculate error rates and create analysis
+    category_analysis = []
+    for category in category_errors.keys():
+        total_questions = total_questions_by_category[category]
+        errors = category_errors[category]
+        correct = total_questions - errors
+        accuracy = (correct / total_questions * 100) if total_questions > 0 else 0
+        
+        # Get education materials for this category
+        education_materials = EducationContent.objects.filter(
+            category=category
+        ).order_by('order')[:3]
+        
+        category_analysis.append({
+            'category': category,
+            'total_questions': total_questions,
+            'correct_answers': correct,
+            'wrong_answers': errors,
+            'accuracy': round(accuracy, 1),
+            'status': 'excellent' if accuracy >= 85 else 'good' if accuracy >= 70 else 'needs_work',
+            'education_materials': education_materials
+        })
+    
+    # Sort by accuracy (worst first for recommendations)
+    category_analysis.sort(key=lambda x: x['accuracy'])
+    
+    # Generate recommendations
+    recommendations = []
+    
+    # Top 3 worst categories
+    for analysis in category_analysis[:3]:
+        if analysis['accuracy'] < 80 and analysis['education_materials']:
+            recommendations.append({
+                'type': 'improve_category',
+                'category': analysis['category'].name_uz,
+                'accuracy': analysis['accuracy'],
+                'wrong_count': analysis['wrong_answers'],
+                'materials': [
+                    {
+                        'title': material.title,
+                        'type': material.content_type,
+                        'url': f'/quiz/education/content/{material.id}/',
+                        'icon': '📹' if material.content_type == 'video' else '📄' if material.content_type == 'text' else '🖼️'
+                    } for material in analysis['education_materials']
+                ]
+            })
+    
+    # Progress trend
+    if total_tests >= 3:
+        recent_avg = results[:total_tests//2].aggregate(Avg('score'))['score__avg'] or 0
+        older_avg = results[total_tests//2:].aggregate(Avg('score'))['score__avg'] or 0
+        
+        if recent_avg > older_avg + 1:
+            progress_trend = 'improving'
+        elif recent_avg < older_avg - 1:
+            progress_trend = 'declining'
+        else:
+            progress_trend = 'stable'
+    else:
+        progress_trend = 'insufficient_data'
+    
+    return {
+        'total_tests': total_tests,
+        'avg_score': round(avg_score, 1),
+        'last_5_avg': round(last_5_avg, 1),
+        'category_analysis': category_analysis,
+        'recommendations': recommendations,
+        'progress_trend': progress_trend
+    }
+
+
+@login_required
+def detailed_statistics_view(request):
+    """Batafsil statistika sahifasi"""
+    analytics = generate_detailed_analytics(request.user)
+    
+    context = {
+        'analytics': analytics
+    }
+    return render(request, 'quiz/detailed_statistics.html', context)
+
+
+@login_required 
+def ai_analytics_view(request):
+    """AI Statistik sahifasi"""
+    try:
+        # AI tahlilini olish
+        ai_insights = get_ai_insights_for_user(request.user)
+        
+        # Qo'shimcha statistika
+        user_results = TestResult.objects.filter(user=request.user)
+        basic_stats = {
+            'total_tests': user_results.count(),
+            'avg_score': user_results.aggregate(Avg('score'))['score__avg'] or 0,
+            'last_test_date': user_results.order_by('-created_at').first().created_at if user_results.exists() else None
+        }
+        
+        context = {
+            'ai_insights': ai_insights,
+            'basic_stats': basic_stats,
+            'user': request.user
+        }
+        
+    except Exception as e:
+        # Xatolik bo'lsa standart xabar
+        context = {
+            'ai_insights': {
+                'ai_analysis': f"AI xizmati vaqtincha mavjud emas. Iltimos keyinroq urinib ko'ring. Xato: {str(e)}",
+                'recommendations': [],
+                'confidence': 0
+            },
+            'basic_stats': {
+                'total_tests': 0,
+                'avg_score': 0,
+                'last_test_date': None
+            },
+            'user': request.user
+        }
+    
+    return render(request, 'quiz/ai_analytics.html', context)

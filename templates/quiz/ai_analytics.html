@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Statistik - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    <!-- AI Header -->
+    <div class="card ai-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 2rem; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: 20px; right: 20px; font-size: 3rem; opacity: 0.3;">🤖</div>
+        <div style="position: relative; z-index: 2;">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <div style="background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 50%; font-size: 2rem;">
+                    🧠
+                </div>
+                <div>
+                    <h1 style="margin: 0; font-size: 2.5rem;">AI Statistik</h1>
+                    <p style="margin: 0; opacity: 0.9;">Sun'iy intellekt yordamida xatolaringizni tahlil qiling</p>
+                </div>
+            </div>
+            
+            {% if ai_insights.confidence > 0 %}
+            <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>AI tahlil ishonchliligi:</span>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="background: rgba(255,255,255,0.3); height: 8px; width: 200px; border-radius: 4px; overflow: hidden;">
+                            <div style="background: #28a745; height: 100%; width: {{ ai_insights.confidence }}%; transition: width 0.3s;"></div>
+                        </div>
+                        <strong>{{ ai_insights.confidence }}%</strong>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div class="card text-center" style="border-left: 4px solid #667eea;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
+            <h4 style="color: #333; margin: 0;">Jami testlar</h4>
+            <div style="font-size: 1.8rem; font-weight: bold; color: #667eea;">{{ basic_stats.total_tests }}</div>
+        </div>
+
+        <div class="card text-center" style="border-left: 4px solid #28a745;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📈</div>
+            <h4 style="color: #333; margin: 0;">O'rtacha ball</h4>
+            <div style="font-size: 1.8rem; font-weight: bold; color: #28a745;">{{ basic_stats.avg_score|floatformat:1 }}/20</div>
+        </div>
+
+        <div class="card text-center" style="border-left: 4px solid #ffc107;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🕒</div>
+            <h4 style="color: #333; margin: 0;">So'nggi test</h4>
+            <div style="font-size: 1rem; font-weight: bold; color: #ffc107;">
+                {% if basic_stats.last_test_date %}
+                    {{ basic_stats.last_test_date|date:"d.m.Y" }}
+                {% else %}
+                    Hali yo'q
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Analysis -->
+    <div class="card ai-analysis" style="margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e9ecef;">
+            <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1rem; border-radius: 50%; font-size: 1.5rem;">
+                🧠
+            </div>
+            <div>
+                <h2 style="margin: 0; color: #333;">AI Tahlili</h2>
+                <p style="margin: 0; color: #6c757d;">Gemini AI sizning xatolaringizni tahlil qildi</p>
+            </div>
+        </div>
+
+        <div style="background: #f8f9fa; border-radius: 8px; padding: 2rem; border-left: 4px solid #667eea;">
+            <div id="ai-text" style="white-space: pre-line; line-height: 1.6; font-size: 1.1rem; color: #333;">
+                {{ ai_insights.ai_analysis }}
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Recommendations -->
+    {% if ai_insights.recommendations %}
+    <div class="card" style="margin-bottom: 2rem;">
+        <h2 style="color: #333; margin-bottom: 1.5rem; display: flex; align-items: center;">
+            <span style="margin-right: 0.5rem;">🎯</span>
+            AI Tavsiyalari
+        </h2>
+
+        <div style="display: grid; gap: 1rem;">
+            {% for rec in ai_insights.recommendations %}
+            <div class="recommendation-card" style="background: 
+                {% if rec.priority == 'urgent' %}linear-gradient(135deg, #dc3545, #c82333)
+                {% elif rec.priority == 'high' %}linear-gradient(135deg, #fd7e14, #e55a4e)
+                {% elif rec.priority == 'medium' %}linear-gradient(135deg, #ffc107, #e0a800)
+                {% else %}linear-gradient(135deg, #28a745, #20c997){% endif %}; 
+                color: white; border-radius: 8px; padding: 1.5rem; position: relative; overflow: hidden;">
+                
+                <div style="position: absolute; top: 10px; right: 15px; font-size: 2rem; opacity: 0.3;">{{ rec.icon }}</div>
+                
+                <div style="position: relative; z-index: 2;">
+                    <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 1rem;">
+                        <div>
+                            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.3rem;">{{ rec.title }}</h3>
+                            <p style="margin: 0; opacity: 0.9;">{{ rec.description }}</p>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; text-transform: uppercase; font-weight: bold;">
+                            {% if rec.priority == 'urgent' %}Shoshilinch
+                            {% elif rec.priority == 'high' %}Muhim
+                            {% elif rec.priority == 'medium' %}O'rtacha
+                            {% else %}Past{% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if rec.action_url %}
+                    <a href="{{ rec.action_url }}" 
+                       style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 0.75rem 1.5rem; border-radius: 6px; text-decoration: none; font-weight: bold; transition: all 0.3s;"
+                       onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+                       onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                        Harakat qiling →
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+        <h2 style="margin: 0 0 1.5rem 0; display: flex; align-items: center;">
+            <span style="margin-right: 0.5rem;">🚀</span>
+            Keyingi qadamlar
+        </h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <a href="/quiz/categories/" 
+               style="background: rgba(255,255,255,0.2); padding: 1.5rem; border-radius: 8px; text-decoration: none; color: white; text-align: center; transition: all 0.3s;"
+               onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
+                <div style="font-weight: bold;">Yangi test</div>
+                <small>Bilimlaringizni sinab ko'ring</small>
+            </a>
+
+            <a href="/quiz/education/" 
+               style="background: rgba(255,255,255,0.2); padding: 1.5rem; border-radius: 8px; text-decoration: none; color: white; text-align: center; transition: all 0.3s;"
+               onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📚</div>
+                <div style="font-weight: bold;">O'rganish</div>
+                <small>Ta'lim materiallarini ko'ring</small>
+            </a>
+
+            <a href="/quiz/statistics/" 
+               style="background: rgba(255,255,255,0.2); padding: 1.5rem; border-radius: 8px; text-decoration: none; color: white; text-align: center; transition: all 0.3s;"
+               onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📈</div>
+                <div style="font-weight: bold;">Batafsil statistika</div>
+                <small>To'liq tahlilni ko'ring</small>
+            </a>
+
+            <button onclick="location.reload()" 
+                    style="background: rgba(255,255,255,0.2); padding: 1.5rem; border-radius: 8px; border: none; color: white; text-align: center; cursor: pointer; transition: all 0.3s;"
+                    onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+                    onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔄</div>
+                <div style="font-weight: bold;">Yangilash</div>
+                <small>AI tahlilini qayta yukla</small>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.ai-header {
+    position: relative;
+}
+
+.ai-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"><animate attributeName="r" values="1;30;1" dur="3s" repeatCount="indefinite"/></circle></svg>') center/cover;
+    opacity: 0.1;
+}
+
+.ai-analysis {
+    position: relative;
+}
+
+.recommendation-card {
+    transition: transform 0.3s ease;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-3px);
+}
+
+#ai-text {
+    animation: typeIn 2s ease-in;
+}
+
+@keyframes typeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+</style>
+
+<script>
+// AI text animation
+document.addEventListener('DOMContentLoaded', function() {
+    const aiText = document.getElementById('ai-text');
+    if (aiText) {
+        const text = aiText.textContent;
+        aiText.textContent = '';
+        
+        let i = 0;
+        const timer = setInterval(() => {
+            aiText.textContent += text.charAt(i);
+            i++;
+            if (i >= text.length) {
+                clearInterval(timer);
+            }
+        }, 20);
+    }
+});
+</script>
+{% endblock %}

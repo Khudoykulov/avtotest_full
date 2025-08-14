@@ -1,0 +1,364 @@
+{% extends 'base.html' %}
+
+{% block title %}Statistika - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    <!-- Header -->
+    <div class="text-center" style="margin-bottom: 2rem;">
+        <h1 style="color: white; font-size: 2.5rem; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+            Sizning statistikangiz
+        </h1>
+        <p style="color: rgba(255,255,255,0.9); font-size: 1.1rem;">
+            Test natijalari va taraqqiyot tahlili
+        </p>
+    </div>
+
+    <!-- Overview Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+        <div class="card text-center">
+            <div style="font-size: 2.5rem; color: #667eea; margin-bottom: 0.5rem;">📊</div>
+            <h3 style="color: #333; margin-bottom: 0.5rem;">Jami testlar</h3>
+            <div style="font-size: 2rem; font-weight: bold; color: #667eea;">{{ stats.total_tests }}</div>
+        </div>
+
+        <div class="card text-center">
+            <div style="font-size: 2.5rem; color: #28a745; margin-bottom: 0.5rem;">✅</div>
+            <h3 style="color: #333; margin-bottom: 0.5rem;">O'tgan testlar</h3>
+            <div style="font-size: 2rem; font-weight: bold; color: #28a745;">{{ stats.passed_tests }}</div>
+            <small style="color: #6c757d;">
+                {% if stats.total_tests > 0 %}
+                    ({{ stats.passed_tests|floatformat:0 }}/{{ stats.total_tests }} - 
+                    {% widthratio stats.passed_tests stats.total_tests 100 %}%)
+                {% else %}
+                    (0%)
+                {% endif %}
+            </small>
+        </div>
+
+        <div class="card text-center">
+            <div style="font-size: 2.5rem; color: #ffc107; margin-bottom: 0.5rem;">⭐</div>
+            <h3 style="color: #333; margin-bottom: 0.5rem;">O'rtacha ball</h3>
+            <div style="font-size: 2rem; font-weight: bold; color: #ffc107;">
+                {{ stats.average_score|floatformat:1 }}/20
+            </div>
+            <small style="color: #6c757d;">
+                ({% widthratio stats.average_score 20 100 %}%)
+            </small>
+        </div>
+
+        <div class="card text-center">
+            <div style="font-size: 2.5rem; color: #dc3545; margin-bottom: 0.5rem;">🏆</div>
+            <h3 style="color: #333; margin-bottom: 0.5rem;">Eng yaxshi natija</h3>
+            <div style="font-size: 2rem; font-weight: bold; color: #dc3545;">{{ stats.best_score }}/20</div>
+            <small style="color: #6c757d;">
+                ({% widthratio stats.best_score 20 100 %}%)
+            </small>
+        </div>
+    </div>
+
+    <!-- Performance Chart -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">📈 Taraqqiyot grafigi</h3>
+        <div style="position: relative; height: 300px; background: #f8f9fa; border-radius: 8px; padding: 1rem;">
+            <canvas id="performanceChart" style="width: 100%; height: 100%;"></canvas>
+        </div>
+        <p style="color: #6c757d; text-align: center; margin-top: 1rem; font-size: 0.9rem;">
+            So'nggi 10 ta test natijalaringiz
+        </p>
+    </div>
+
+    <!-- Category Performance -->
+    {% if category_stats %}
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">📚 Mavzular bo'yicha natijalar</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+            {% for category_name, category_data in category_stats.items %}
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #667eea;">
+                <h4 style="color: #333; margin-bottom: 1rem;">{{ category_name }}</h4>
+                
+                <div style="margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: #6c757d;">O'rtacha ball:</span>
+                        <span style="font-weight: bold; color: #333;">{{ category_data.average|floatformat:1 }}/20</span>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div style="background: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: linear-gradient(90deg, #667eea, #764ba2); height: 100%; width: {% widthratio category_data.average 20 100 %}%; transition: width 0.3s;"></div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: #6c757d;">
+                    <span>Testlar: {{ category_data.total }}</span>
+                    <span>Eng yaxshi: {{ category_data.best }}/20</span>
+                </div>
+
+                <!-- Performance Level -->
+                <div style="margin-top: 1rem; text-align: center;">
+                    {% if category_data.average >= 18 %}
+                        <span style="background: #28a745; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem;">A'lo</span>
+                    {% elif category_data.average >= 16 %}
+                        <span style="background: #17a2b8; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem;">Yaxshi</span>
+                    {% elif category_data.average >= 14 %}
+                        <span style="background: #ffc107; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem;">Qoniqarli</span>
+                    {% else %}
+                        <span style="background: #dc3545; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem;">Yaxshilash kerak</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recent Results Table -->
+    {% if stats.recent_results %}
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">📋 So'nggi natijalar</h3>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f8f9fa;">
+                        <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #dee2e6; font-weight: 600;">Test</th>
+                        <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600;">Natija</th>
+                        <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600;">Foiz</th>
+                        <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600;">Holat</th>
+                        <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600;">Vaqt</th>
+                        <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600;">Sana</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in stats.recent_results %}
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 1rem;">
+                            <div style="font-weight: 500;">
+                                {% if result.ticket %}
+                                    🎫 Bilet {{ result.ticket.ticket_number }}
+                                {% else %}
+                                    📚 {{ result.category.name_uz }}
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <span style="font-weight: bold; font-size: 1.1rem;">{{ result.score }}/{{ result.total_questions }}</span>
+                        </td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <span style="font-weight: 500;">{% widthratio result.score result.total_questions 100 %}%</span>
+                        </td>
+                        <td style="padding: 1rem; text-align: center;">
+                            {% if result.passed %}
+                                <span style="background: #28a745; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem;">O'tdi</span>
+                            {% else %}
+                                <span style="background: #dc3545; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem;">O'tmadi</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 1rem; text-align: center; color: #6c757d;">
+                            {{ result.time_taken|time:"i:s" }}
+                        </td>
+                        <td style="padding: 1rem; text-align: center; color: #6c757d;">
+                            {{ result.created_at|date:"d.m.Y H:i" }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Performance Insights -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">💡 Tahlil va tavsiyalar</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+            <!-- Strength Analysis -->
+            <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #28a745;">
+                <h4 style="color: #28a745; margin-bottom: 1rem;">🎯 Kuchli tomonlar</h4>
+                {% if stats.best_score >= 18 %}
+                    <p style="color: #333; margin-bottom: 0.5rem;">• A'lo natijalar ko'rsatyapsiz</p>
+                    <p style="color: #333; margin-bottom: 0.5rem;">• Bilimlaringiz yuqori darajada</p>
+                {% elif stats.best_score >= 14 %}
+                    <p style="color: #333; margin-bottom: 0.5rem;">• Yaxshi natijalar bor</p>
+                    <p style="color: #333; margin-bottom: 0.5rem;">• Asosiy qoidalarni bilasiz</p>
+                {% else %}
+                    <p style="color: #333; margin-bottom: 0.5rem;">• Harakat qilyapsiz</p>
+                    <p style="color: #333; margin-bottom: 0.5rem;">• Taraqqiyot yo'lida</p>
+                {% endif %}
+            </div>
+
+            <!-- Improvement Areas -->
+            <div style="background: #fff3cd; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #ffc107;">
+                <h4 style="color: #856404; margin-bottom: 1rem;">📈 Yaxshilash kerak</h4>
+                {% if stats.average_score < 14 %}
+                    <p style="color: #333; margin-bottom: 0.5rem;">• Ko'proq mashq qiling</p>
+                    <p style="color: #333; margin-bottom: 0.5rem;">• Nazariy bilimlarni mustahkamlang</p>
+                {% elif stats.average_score < 16 %}
+                    <p style="color: #333; margin-bottom: 0.5rem;">• Qiyin mavzularga e'tibor bering</p>
+                    <p style="color: #333; margin-bottom: 0.5rem;">• Muntazam test topshiring</p>
+                {% else %}
+                    <p style="color: #333; margin-bottom: 0.5rem;">• Barqarorlikni saqlang</p>
+                    <p style="color: #333; margin-bottom: 0.5rem;">• Yangi mavzularni o'rganing</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="text-center">
+        <a href="{% url 'quiz:categories' %}" class="btn" style="margin-right: 1rem;">Yangi test topshirish</a>
+        <a href="{% url 'quiz:recommendations' %}" class="btn btn-secondary" style="margin-right: 1rem;">Tavsiyalar</a>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Bosh sahifa</a>
+    </div>
+</div>
+
+<!-- Chart.js for Performance Chart -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const canvas = document.getElementById('performanceChart');
+    const ctx = canvas.getContext('2d');
+    
+    // Sample data - in real app this would come from backend
+    const recentResults = [
+        {% for result in stats.recent_results reversed %}
+            {
+                date: '{{ result.created_at|date:"d.m" }}',
+                score: {{ result.score }},
+                total: {{ result.total_questions }},
+                percentage: {% widthratio result.score result.total_questions 100 %}
+            }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    if (recentResults.length > 0) {
+        drawChart(ctx, recentResults);
+    } else {
+        // Show "No data" message
+        ctx.fillStyle = '#6c757d';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Hali test topshirmadingiz', canvas.width / 2, canvas.height / 2);
+    }
+});
+
+function drawChart(ctx, data) {
+    const canvas = ctx.canvas;
+    const width = canvas.width;
+    const height = canvas.height;
+    const padding = 40;
+    const chartWidth = width - 2 * padding;
+    const chartHeight = height - 2 * padding;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    // Draw grid lines
+    ctx.strokeStyle = '#e9ecef';
+    ctx.lineWidth = 1;
+    
+    // Horizontal grid lines
+    for (let i = 0; i <= 5; i++) {
+        const y = padding + (chartHeight / 5) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(width - padding, y);
+        ctx.stroke();
+        
+        // Y-axis labels
+        ctx.fillStyle = '#6c757d';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText((100 - i * 20) + '%', padding - 10, y + 4);
+    }
+    
+    // Draw data line
+    if (data.length > 1) {
+        ctx.strokeStyle = '#667eea';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        
+        data.forEach((point, index) => {
+            const x = padding + (chartWidth / (data.length - 1)) * index;
+            const y = padding + chartHeight - (chartHeight * point.percentage / 100);
+            
+            if (index === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+        });
+        
+        ctx.stroke();
+    }
+    
+    // Draw data points
+    data.forEach((point, index) => {
+        const x = padding + (chartWidth / Math.max(data.length - 1, 1)) * index;
+        const y = padding + chartHeight - (chartHeight * point.percentage / 100);
+        
+        // Point circle
+        ctx.fillStyle = '#667eea';
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Point border
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // X-axis labels
+        ctx.fillStyle = '#6c757d';
+        ctx.font = '12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(point.date, x, height - 10);
+        
+        // Score labels on hover (simplified)
+        ctx.fillStyle = '#333';
+        ctx.font = 'bold 10px Arial';
+        ctx.fillText(point.score + '/' + point.total, x, y - 15);
+    });
+    
+    // Chart title
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 14px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Test natijalari dinamikasi', width / 2, 20);
+}
+</script>
+
+<style>
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card table {
+        font-size: 0.9rem;
+    }
+    
+    .card table th,
+    .card table td {
+        padding: 0.5rem !important;
+    }
+    
+    #performanceChart {
+        height: 250px !important;
+    }
+}
+
+/* Hover effects for cards */
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+}
+
+/* Animation for progress bars */
+@keyframes progressAnimation {
+    from { width: 0%; }
+    to { width: var(--progress-width); }
+}
+
+.card [style*="width:"] {
+    animation: progressAnimation 1s ease-out;
+}
+</style>
+{% endblock %}

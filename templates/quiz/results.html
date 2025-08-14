@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test natijalari - Avtotest</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .results-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .results-header {
+            padding: 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .results-header.passed {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .results-header.failed {
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+        }
+
+        .result-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .result-title {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-score {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        .result-details {
+            padding: 2rem;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .detail-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f8f9ff;
+            border-radius: 8px;
+        }
+
+        .detail-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .weak-topics {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .weak-topics h3 {
+            color: #856404;
+            margin-bottom: 1rem;
+        }
+
+        .topic-list {
+            list-style: none;
+        }
+
+        .topic-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #ffeaa7;
+        }
+
+        .topic-item:last-child {
+            border-bottom: none;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <a href="{% url 'home' %}" class="logo">
+                🚗 AvtoTest
+            </a>
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}">Bosh sahifa</a></li>
+                <li><a href="{% url 'quiz:categories' %}">Testlar</a></li>
+                <li><a href="{% url 'quiz:statistics' %}">Statistika</a></li>
+                <li><a href="{% url 'quiz:education' %}">Ta'lim</a></li>
+                <li><a href="{% url 'account:profile' %}">{{ user.first_name|default:user.username }}</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="results-card">
+            <div class="results-header {% if test_result.passed %}passed{% else %}failed{% endif %}">
+                <div class="result-icon">
+                    {% if test_result.passed %}🎉{% else %}😔{% endif %}
+                </div>
+                <h1 class="result-title">
+                    {% if test_result.passed %}Tabriklaymiz!{% else %}Afsuski...{% endif %}
+                </h1>
+                <div class="result-score">{{ test_result.score }}/{{ test_result.total_questions }}</div>
+                <p>
+                    {% if test_result.passed %}
+                        Siz testdan muvaffaqiyatli o'tdingiz! ({{ pass_percentage }}% kerak edi)
+                    {% else %}
+                        Test topshirish uchun ko'proq tayyorgarlik kerak. ({{ pass_percentage }}% kerak)
+                    {% endif %}
+                </p>
+                {% if test_result.ticket %}
+                    <p><strong>{{ test_result.ticket.name }}</strong></p>
+                {% elif test_result.category %}
+                    <p><strong>{{ test_result.category.name_uz }}</strong></p>
+                {% endif %}
+            </div>
+
+            <div class="result-details">
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <div class="detail-value">{{ correct_answers.count }}</div>
+                        <div class="detail-label">To'g'ri javoblar</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-value">{{ incorrect_answers.count }}</div>
+                        <div class="detail-label">Noto'g'ri javoblar</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-value">{% widthratio test_result.score test_result.total_questions 100 %}%</div>
+                        <div class="detail-label">Natija foizi</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-value">
+                            {% if test_result.time_taken %}
+                                {{ test_result.time_taken|floatformat:0 }} daq
+                            {% else %}
+                                --
+                            {% endif %}
+                        </div>
+                        <div class="detail-label">Sarflangan vaqt</div>
+                    </div>
+                </div>
+
+                {% if weak_topics %}
+                <div class="weak-topics">
+                    <h3>🎯 Kuchsiz mavzular</h3>
+                    <p>Quyidagi mavzularga ko'proq e'tibor bering:</p>
+                    <ul class="topic-list">
+                        {% for topic in weak_topics %}
+                        <li class="topic-item">
+                            <strong>{{ topic.category }}</strong> - {{ topic.mistakes }} ta xato
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <div class="actions">
+                    {% if test_result.passed %}
+                        <a href="{% url 'quiz:tickets' %}" class="btn btn-success">Keyingi test</a>
+                        <a href="{% url 'quiz:statistics' %}" class="btn btn-secondary">Statistika</a>
+                        <a href="{% url 'quiz:recommendations' %}" class="btn btn-secondary">Tavsiyalar</a>
+                    {% else %}
+                        <a href="{% url 'quiz:education' %}" class="btn">O'rganish</a>
+                        <a href="{% url 'quiz:recommendations' %}" class="btn">Tavsiyalar</a>
+                        <a href="{% url 'quiz:categories' %}" class="btn btn-secondary">Qayta urinish</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

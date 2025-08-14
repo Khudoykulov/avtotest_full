@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ta'lim materiallari - Avtotest</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .category-icon {
+            font-size: 2rem;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .category-info h3 {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .category-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .content-list {
+            list-style: none;
+        }
+
+        .content-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            transition: background 0.3s;
+            cursor: pointer;
+        }
+
+        .content-item:hover {
+            background: #f8f9ff;
+        }
+
+        .content-type-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: white;
+        }
+
+        .content-type-video { background: #ff4757; }
+        .content-type-text { background: #2ed573; }
+        .content-type-image { background: #ffa502; }
+
+        .content-title {
+            flex: 1;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .content-duration {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+            margin-bottom: 2rem;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .categories-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <a href="{% url 'home' %}" class="logo">
+                🚗 AvtoTest
+            </a>
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}">Bosh sahifa</a></li>
+                <li><a href="{% url 'quiz:categories' %}">Testlar</a></li>
+                <li><a href="{% url 'quiz:statistics' %}">Statistika</a></li>
+                <li><a href="{% url 'quiz:education' %}" class="active">Ta'lim</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'account:profile' %}">{{ user.first_name|default:user.username }}</a></li>
+                {% else %}
+                    <li><a href="{% url 'account:login' %}">Kirish</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>📚 Ta'lim materiallari</h1>
+            <p>Haydovchilik qoidalarini o'rganing va bilimlaringizni mustahkamlang</p>
+        </div>
+
+        <div class="categories-grid">
+            {% for category in categories %}
+            <div class="category-card">
+                <div class="category-header">
+                    <div class="category-icon">
+                        {{ category.icon|default:"📖" }}
+                    </div>
+                    <div class="category-info">
+                        <h3>{{ category.name_uz }}</h3>
+                        <p>{{ category.education_content.count }} ta material</p>
+                    </div>
+                </div>
+                
+                <ul class="content-list">
+                    {% for content in category.education_content.all|slice:":5" %}
+                    <li class="content-item" onclick="openContent('{{ content.id }}')">
+                        <div class="content-type-icon content-type-{{ content.content_type }}">
+                            {% if content.content_type == 'video' %}📹
+                            {% elif content.content_type == 'text' %}📄
+                            {% else %}🖼️{% endif %}
+                        </div>
+                        <div class="content-title">{{ content.title }}</div>
+                        <div class="content-duration">
+                            {% if content.content_type == 'video' %}Video
+                            {% elif content.content_type == 'text' %}Matn
+                            {% else %}Rasm{% endif %}
+                        </div>
+                    </li>
+                    {% empty %}
+                    <li style="text-align: center; color: #666; padding: 1rem;">
+                        Hozircha materiallar yo'q
+                    </li>
+                    {% endfor %}
+                    
+                    {% if category.education_content.count > 5 %}
+                    <li style="text-align: center; padding: 1rem;">
+                        <a href="{% url 'quiz:education_category' category.id %}" 
+                           style="color: #667eea; text-decoration: none; font-weight: 500;">
+                            Barchasini ko'rish ({{ category.education_content.count }} ta)
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function openContent(contentId) {
+            window.location.href = `/quiz/education/content/${contentId}/`;
+        }
+    </script>
+</body>
+</html>

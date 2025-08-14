@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ test_name }} - Test topshirish{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    <div class="card">
+        <!-- Test Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #e9ecef;">
+            <button onclick="window.history.back()" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
+                ← Testni tugatish
+            </button>
+            <h1 style="color: #667eea; margin: 0;">{{ test_name }}</h1>
+            <div></div>
+        </div>
+
+        <!-- Test Stats -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-bottom: 2rem;">
+            <div style="text-align: center; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 0.5rem;">JORIY SAVOL</div>
+                <div id="current-question" style="font-size: 1.5rem; font-weight: bold; color: #333;">1/{{ questions.count }}</div>
+            </div>
+            <div style="text-align: center; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 0.5rem;">TO'G'RI JAVOBLAR</div>
+                <div id="correct-count" style="font-size: 1.5rem; font-weight: bold; color: #28a745;">0</div>
+            </div>
+            <div style="text-align: center; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 0.5rem;">QOLGAN VAQT</div>
+                <div id="timer" style="font-size: 1.5rem; font-weight: bold; color: #dc3545;">20:00</div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
+            <!-- Question Area -->
+            <div>
+                <div id="question-container">
+                    <!-- Questions will be loaded here by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Question Navigation -->
+            <div>
+                <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px;">
+                    <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                        <div style="font-size: 1.2rem; margin-right: 0.5rem;">📋</div>
+                        <h3 style="color: #333; margin: 0;">Savollar ro'yxati</h3>
+                    </div>
+                    
+                    <div id="question-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 1.5rem;">
+                        {% for i in "12345678901234567890" %}
+                        <button class="question-nav-btn" data-question="{{ forloop.counter }}" 
+                                style="width: 40px; height: 40px; border: 2px solid #dee2e6; background: white; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
+                            {{ forloop.counter }}
+                        </button>
+                        {% endfor %}
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <button onclick="previousQuestion()" class="btn btn-secondary" style="width: 48%; margin-right: 4%;">
+                            ← Oldingi
+                        </button>
+                        <button onclick="nextQuestion()" class="btn" style="width: 48%;">
+                            Keyingi →
+                        </button>
+                    </div>
+
+                    <button onclick="finishTest()" class="btn" style="width: 100%; background: #28a745;">
+                        ✓ Testni yakunlash
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sample Questions Data (In real app, this would come from backend) -->
+<script>
+const questions = [
+    {
+        id: 1,
+        text: "Agar piyodalar o'tish joyida tirbandlik vujudga kelib, haydovchini piyodalar o'tish joyida to'xtagaa majbur qilsa, haydovchi majbur:",
+        image: "/placeholder.svg?height=200&width=300",
+        answers: [
+            { id: 1, text: "Piyodalar o'tish joyi oldidan 5 metr berida to'xtash", correct: false },
+            { id: 2, text: "Piyodalar o'tish joyi oldidan 15 metr berida to'xtash", correct: true },
+            { id: 3, text: "Oldinda turgan transport vositasidan zarar masofaa saqlangan holda piyodalar o'tish joyida to'xtash", correct: false },
+            { id: 4, text: "To'xtash va piyodalar o'tish joyiga o'tmaslikka, chunki bu piyodalarning xarakati uchun to'sqinlik qiladi", correct: false }
+        ]
+    }
+    // Add more questions here...
+];
+
+let currentQuestionIndex = 0;
+let userAnswers = {};
+let timeLeft = 1200; // 20 minutes in seconds
+let timerInterval;
+
+// Initialize test
+document.addEventListener('DOMContentLoaded', function() {
+    loadQuestion(0);
+    startTimer();
+    updateQuestionNavigation();
+});
+
+function loadQuestion(index) {
+    const question = questions[index] || questions[0];
+    currentQuestionIndex = index;
+    
+    const container = document.getElementById('question-container');
+    container.innerHTML = `
+        <div style="margin-bottom: 2rem;">
+            ${question.image ? `<img src="${question.image}" alt="Test rasmi" style="max-width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem;">` : ''}
+            <div style="background: #e3f2fd; padding: 1.5rem; border-left: 4px solid #2196f3; border-radius: 8px; margin-bottom: 1.5rem;">
+                <p style="font-size: 1.1rem; line-height: 1.6; margin: 0; color: #333;">${question.text}</p>
+            </div>
+        </div>
+        
+        <div style="space-y: 1rem;">
+            ${question.answers.map(answer => `
+                <label style="display: block; background: white; border: 2px solid #e9ecef; border-radius: 8px; padding: 1rem; cursor: pointer; transition: all 0.3s;" 
+                       onmouseover="this.style.borderColor='#667eea'" 
+                       onmouseout="this.style.borderColor='#e9ecef'"
+                       onclick="selectAnswer(${question.id}, ${answer.id}, this)">
+                    <input type="radio" name="question_${question.id}" value="${answer.id}" style="margin-right: 0.75rem;">
+                    <span style="font-size: 1rem; line-height: 1.5;">${answer.text}</span>
+                </label>
+            `).join('')}
+        </div>
+    `;
+    
+    // Update current question display
+    document.getElementById('current-question').textContent = `${index + 1}/20`;
+    
+    // Restore previous answer if exists
+    if (userAnswers[question.id]) {
+        const radio = container.querySelector(`input[value="${userAnswers[question.id]}"]`);
+        if (radio) {
+            radio.checked = true;
+            radio.closest('label').style.borderColor = '#667eea';
+            radio.closest('label').style.background = '#f0f4ff';
+        }
+    }
+}
+
+function selectAnswer(questionId, answerId, element) {
+    userAnswers[questionId] = answerId;
+    
+    // Update visual feedback
+    const labels = element.parentNode.querySelectorAll('label');
+    labels.forEach(label => {
+        label.style.borderColor = '#e9ecef';
+        label.style.background = 'white';
+    });
+    
+    element.style.borderColor = '#667eea';
+    element.style.background = '#f0f4ff';
+    
+    // Update question navigation button
+    const navBtn = document.querySelector(`[data-question="${currentQuestionIndex + 1}"]`);
+    navBtn.style.background = '#667eea';
+    navBtn.style.color = 'white';
+    navBtn.style.borderColor = '#667eea';
+}
+
+function nextQuestion() {
+    if (currentQuestionIndex < 19) {
+        loadQuestion(currentQuestionIndex + 1);
+        updateQuestionNavigation();
+    }
+}
+
+function previousQuestion() {
+    if (currentQuestionIndex > 0) {
+        loadQuestion(currentQuestionIndex - 1);
+        updateQuestionNavigation();
+    }
+}
+
+function updateQuestionNavigation() {
+    const buttons = document.querySelectorAll('.question-nav-btn');
+    buttons.forEach((btn, index) => {
+        btn.onclick = () => {
+            loadQuestion(index);
+            updateQuestionNavigation();
+        };
+        
+        // Highlight current question
+        if (index === currentQuestionIndex) {
+            btn.style.background = '#764ba2';
+            btn.style.color = 'white';
+            btn.style.borderColor = '#764ba2';
+        } else if (userAnswers[index + 1]) {
+            btn.style.background = '#667eea';
+            btn.style.color = 'white';
+            btn.style.borderColor = '#667eea';
+        } else {
+            btn.style.background = 'white';
+            btn.style.color = '#333';
+            btn.style.borderColor = '#dee2e6';
+        }
+    });
+}
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        document.getElementById('timer').textContent = 
+            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            finishTest();
+        }
+    }, 1000);
+}
+
+function finishTest() {
+    clearInterval(timerInterval);
+    
+    const answeredCount = Object.keys(userAnswers).length;
+    if (answeredCount < 20) {
+        if (!confirm(`Siz ${answeredCount}/20 ta savolga javob berdingiz. Testni yakunlashni xohlaysizmi?`)) {
+            return;
+        }
+    }
+    
+    // Calculate results (simplified)
+    let correctCount = 0;
+    Object.entries(userAnswers).forEach(([questionId, answerId]) => {
+        const question = questions.find(q => q.id == questionId);
+        if (question) {
+            const answer = question.answers.find(a => a.id == answerId);
+            if (answer && answer.correct) {
+                correctCount++;
+            }
+        }
+    });
+    
+    // Update correct count display
+    document.getElementById('correct-count').textContent = correctCount;
+    
+    // Show results
+    const passed = correctCount >= 14;
+    const resultMessage = passed ? 
+        `Tabriklaymiz! Siz testdan o'tdingiz. Natija: ${correctCount}/20` :
+        `Afsuski, test topshirilmadi. Natija: ${correctCount}/20. Qayta urinib ko'ring.`;
+    
+    alert(resultMessage);
+    
+    // Redirect to results or home
+    window.location.href = "{% url 'home' %}";
+}
+</script>
+
+<style>
+.question-nav-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 768px) {
+    .card > div:first-child {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+    
+    #question-grid {
+        grid-template-columns: repeat(5, 1fr) !important;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Batafsil tahlil - Avtotest{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    <!-- Header -->
+    <div class="text-center" style="margin-bottom: 2rem;">
+        <h1 style="color: white; font-size: 2.5rem; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+            Batafsil tahlil va hisobotlar
+        </h1>
+        <p style="color: rgba(255,255,255,0.9); font-size: 1.1rem;">
+            Chuqur tahlil va taraqqiyot ko'rsatkichlari
+        </p>
+    </div>
+
+    <!-- Performance Trends -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">📊 Haftalik taraqqiyot</h3>
+        
+        {% if stats.weekly_stats %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+            {% for week in stats.weekly_stats %}
+            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: center;">
+                <h4 style="color: #333; margin-bottom: 0.5rem;">{{ week.week }}</h4>
+                <div style="font-size: 1.5rem; font-weight: bold; color: #667eea; margin-bottom: 0.5rem;">
+                    {{ week.average }}/20
+                </div>
+                <div style="font-size: 0.9rem; color: #6c757d;">
+                    {{ week.tests }} ta test • {{ week.passed }} ta o'tdi
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color: #6c757d; text-align: center; padding: 2rem;">
+            Haftalik statistika uchun ko'proq test topshiring
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Time Analysis -->
+    {% if stats.time_stats %}
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">⏱️ Vaqt tahlili</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+            <div style="text-align: center; background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+                <div style="font-size: 2rem; color: #17a2b8; margin-bottom: 0.5rem;">⏱️</div>
+                <h4 style="color: #333; margin-bottom: 0.5rem;">O'rtacha vaqt</h4>
+                <div style="font-size: 1.5rem; font-weight: bold; color: #17a2b8;">
+                    {{ stats.time_stats.average_time|floatformat:1 }} daqiqa
+                </div>
+            </div>
+
+            <div style="text-align: center; background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+                <div style="font-size: 2rem; color: #28a745; margin-bottom: 0.5rem;">🚀</div>
+                <h4 style="color: #333; margin-bottom: 0.5rem;">Eng tez</h4>
+                <div style="font-size: 1.5rem; font-weight: bold; color: #28a745;">
+                    {{ stats.time_stats.fastest_time|floatformat:1 }} daqiqa
+                </div>
+            </div>
+
+            <div style="text-align: center; background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
+                <div style="font-size: 2rem; color: #ffc107; margin-bottom: 0.5rem;">🐌</div>
+                <h4 style="color: #333; margin-bottom: 0.5rem;">Eng sekin</h4>
+                <div style="font-size: 1.5rem; font-weight: bold; color: #ffc107;">
+                    {{ stats.time_stats.slowest_time|floatformat:1 }} daqiqa
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- User Ranking -->
+    {% if stats.user_ranking %}
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">🏆 Umumiy reyting</h3>
+        
+        <div style="text-align: center; padding: 2rem;">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">
+                {% if stats.user_ranking.percentile >= 90 %}🥇
+                {% elif stats.user_ranking.percentile >= 70 %}🥈
+                {% elif stats.user_ranking.percentile >= 50 %}🥉
+                {% else %}📊{% endif %}
+            </div>
+            
+            <h4 style="color: #333; margin-bottom: 1rem;">
+                Siz {{ stats.user_ranking.total_users }} foydalanuvchi ichida 
+                <span style="color: #667eea; font-weight: bold;">{{ stats.user_ranking.rank }}-o'rindasiz</span>
+            </h4>
+            
+            <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; display: inline-block;">
+                <span style="font-size: 2rem; font-weight: bold; color: #667eea;">
+                    {{ stats.user_ranking.percentile }}%
+                </span>
+                <div style="color: #6c757d; font-size: 0.9rem;">percentil</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Difficult Questions -->
+    {% if stats.difficult_questions %}
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">❌ Qiyin savollar</h3>
+        <p style="color: #6c757d; margin-bottom: 1.5rem;">
+            Eng ko'p xato qilgan savollaringiz
+        </p>
+        
+        <div style="space-y: 1rem;">
+            {% for question in stats.difficult_questions %}
+            <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; border-left: 4px solid #ffc107; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: between; align-items: start;">
+                    <div style="flex: 1;">
+                        <p style="color: #333; margin-bottom: 0.5rem;">{{ question.question__question_text|truncatechars:100 }}</p>
+                    </div>
+                    <div style="background: #dc3545; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem; margin-left: 1rem;">
+                        {{ question.wrong_count }} marta xato
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Improvement Suggestions -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">💡 Shaxsiy tavsiyalar</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+            {% for suggestion in stats.improvement_suggestions %}
+            <div style="background: #e3f2fd; padding: 1rem; border-radius: 8px; border-left: 4px solid #2196f3;">
+                <p style="color: #333; margin: 0;">{{ suggestion }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="text-center">
+        <a href="{% url 'quiz:statistics' %}" class="btn btn-secondary" style="margin-right: 1rem;">Asosiy statistika</a>
+        <a href="{% url 'quiz:categories' %}" class="btn" style="margin-right: 1rem;">Test topshirish</a>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Bosh sahifa</a>
+    </div>
+</div>
+{% endblock %}

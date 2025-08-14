@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ content.title }} - Ta'lim materiallari</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            transition: background 0.3s;
+            margin-bottom: 2rem;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-header {
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+        }
+
+        .content-type {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .content-title {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .content-category {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .content-body {
+            padding: 2rem;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+
+        .video-placeholder {
+            text-align: center;
+            color: #666;
+        }
+
+        .video-placeholder i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .content-text {
+            line-height: 1.8;
+            font-size: 1.1rem;
+            color: #444;
+        }
+
+        .content-text h3 {
+            color: #333;
+            margin: 2rem 0 1rem 0;
+            font-size: 1.3rem;
+        }
+
+        .content-text p {
+            margin-bottom: 1.5rem;
+        }
+
+        .content-text ul {
+            margin: 1rem 0 1.5rem 2rem;
+        }
+
+        .content-text li {
+            margin-bottom: 0.5rem;
+        }
+
+        .image-content {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .image-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .related-content {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+        }
+
+        .related-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .related-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .related-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f8f9ff;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            transition: background 0.3s;
+        }
+
+        .related-item:hover {
+            background: #e8f0ff;
+        }
+
+        .related-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .content-title {
+                font-size: 1.5rem;
+            }
+
+            .video-container {
+                height: 250px;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <a href="{% url 'home' %}" class="logo">
+                🚗 AvtoTest
+            </a>
+            <ul class="nav-links">
+                <li><a href="{% url 'home' %}">Bosh sahifa</a></li>
+                <li><a href="{% url 'quiz:categories' %}">Testlar</a></li>
+                <li><a href="{% url 'quiz:statistics' %}">Statistika</a></li>
+                <li><a href="{% url 'quiz:education' %}" class="active">Ta'lim</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'account:profile' %}">{{ user.first_name|default:user.username }}</a></li>
+                {% else %}
+                    <li><a href="{% url 'account:login' %}">Kirish</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <div class="container">
+        <a href="{% url 'quiz:education_category' content.category.id %}" class="back-button">
+            ← {{ content.category.name_uz }}ga qaytish
+        </a>
+
+        <div class="content-card">
+            <div class="content-header">
+                <div class="content-type">
+                    {% if content.content_type == 'video' %}📹 Video dars
+                    {% elif content.content_type == 'text' %}📄 Matn materiali
+                    {% else %}🖼️ Rasm materiali{% endif %}
+                </div>
+                <h1 class="content-title">{{ content.title }}</h1>
+                <p class="content-category">{{ content.category.name_uz }}</p>
+            </div>
+
+            <div class="content-body">
+                {% if content.content_type == 'video' %}
+                    {% if content.video_url %}
+                        <div class="video-container">
+                            <iframe src="{{ content.video_url }}" 
+                                    width="100%" height="100%" 
+                                    frameborder="0" allowfullscreen>
+                            </iframe>
+                        </div>
+                    {% else %}
+                        <div class="video-container">
+                            <div class="video-placeholder">
+                                <i>📹</i>
+                                <p>Video tez orada qo'shiladi</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% elif content.content_type == 'image' and content.image %}
+                    <div class="image-content">
+                        <img src="{{ content.image.url }}" alt="{{ content.title }}">
+                    </div>
+                {% endif %}
+
+                {% if content.text_content %}
+                    <div class="content-text">
+                        {{ content.text_content|linebreaks }}
+                    </div>
+                {% endif %}
+
+                {% if related_content %}
+                <div class="related-content">
+                    <h3 class="related-title">Bog'liq materiallar</h3>
+                    <div class="related-list">
+                        {% for related in related_content %}
+                        <a href="{% url 'quiz:education_content' related.id %}" class="related-item">
+                            <div class="related-icon" style="background: 
+                                {% if related.content_type == 'video' %}#ff4757
+                                {% elif related.content_type == 'text' %}#2ed573
+                                {% else %}#ffa502{% endif %}">
+                                {% if related.content_type == 'video' %}📹
+                                {% elif related.content_type == 'text' %}📄
+                                {% else %}🖼️{% endif %}
+                            </div>
+                            <div>
+                                <div style="font-weight: 500;">{{ related.title }}</div>
+                                <div style="font-size: 0.9rem; color: #666;">
+                                    {% if related.content_type == 'video' %}Video dars
+                                    {% elif related.content_type == 'text' %}Matn materiali
+                                    {% else %}Rasm materiali{% endif %}
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

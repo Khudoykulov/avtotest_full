@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Tasodifiy biletlarni tanlang - Avtotest{% endblock %}
+
+{% block content %}
+<div class="text-center" style="margin-bottom: 2rem;">
+    <h1 style="color: white; font-size: 2.5rem; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+        Haydovchilik guvohnomasi olish uchun professional test topshiring
+    </h1>
+    <div style="width: 60px; height: 4px; background: #ffd700; margin: 0 auto; border-radius: 2px;"></div>
+</div>
+
+<div class="card">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
+        <h2 style="color: #333; margin-bottom: 1rem;">Tasodifiy biletlarni tanlang</h2>
+        <p style="color: #6c757d;">
+            Har bir bilet tasodifiy tanlangan 20ta savoldan iborat. Real imtihonga tayyorgarlik 
+            uchun eng mukammal platforma.
+        </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem;">
+        {% for i in "12345" %}
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; text-align: center; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: bold;">{{ i }}</div>
+            <h3 style="color: #333; margin-bottom: 0.5rem;">Bilet {{ i }}</h3>
+            <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">20 ta savol</p>
+            <p style="color: #dc3545; font-size: 0.8rem; margin-bottom: 1rem;">Tasodifiy tanlov</p>
+            <a href="{% url 'quiz:take_ticket_test' i %}" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Testni boshlash</a>
+        </div>
+        {% endfor %}
+
+        {% for i in "678910" %}
+        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; text-align: center; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: bold;">{{ i }}</div>
+            <h3 style="color: #333; margin-bottom: 0.5rem;">Bilet {{ i }}</h3>
+            <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">20 ta savol</p>
+            <p style="color: #dc3545; font-size: 0.8rem; margin-bottom: 1rem;">Tasodifiy tanlov</p>
+            <a href="{% url 'quiz:take_ticket_test' i %}" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Testni boshlash</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="text-center mt-3">
+        <a href="{% url 'quiz:categories' %}" class="btn btn-secondary">Bosh sahifaga qaytish</a>
+    </div>
+</div>
+{% endblock %}

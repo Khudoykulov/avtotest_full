@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+
+{% block title %}Shaxsiy tavsiyalar - Avtotest{% endblock %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto;">
+    <!-- Header -->
+    <div class="text-center" style="margin-bottom: 2rem;">
+        <h1 style="color: white; font-size: 2.5rem; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+            Sizga maxsus tavsiyalar
+        </h1>
+        <p style="color: rgba(255,255,255,0.9); font-size: 1.1rem;">
+            Test natijalaringiz asosida tayyorlangan shaxsiy o'quv rejasi
+        </p>
+    </div>
+
+    <!-- Performance Overview -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; margin-bottom: 1.5rem;">
+            <div style="font-size: 2rem; margin-right: 1rem;">🎯</div>
+            <div>
+                <h3 style="color: #667eea; margin: 0;">Sizning darajangiz</h3>
+                <p style="color: #6c757d; margin: 0;">{{ total_tests }} ta test topshirdingiz</p>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div style="text-align: center; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #667eea;">
+                    {% if performance_level == 'excellent' %}A'lo
+                    {% elif performance_level == 'good' %}Yaxshi
+                    {% elif performance_level == 'average' %}O'rtacha
+                    {% else %}Boshlang'ich{% endif %}
+                </div>
+                <div style="color: #6c757d; font-size: 0.9rem;">Umumiy daraja</div>
+            </div>
+
+            <div style="text-align: center; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #28a745;">{{ readiness_percentage }}%</div>
+                <div style="color: #6c757d; font-size: 0.9rem;">Imtihonga tayyorlik</div>
+            </div>
+
+            <div style="text-align: center; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+                <div style="font-size: 1.5rem; font-weight: bold; color: #ffc107;">{{ estimated_study_days }}</div>
+                <div style="color: #6c757d; font-size: 0.9rem;">Tavsiya etilgan kun</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Priority Recommendations -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">🚨 Birinchi navbatda</h3>
+        
+        {% if priority_recommendations %}
+        <div style="display: grid; gap: 1rem;">
+            {% for rec in priority_recommendations %}
+            <div style="background: {% if rec.priority == 'high' %}#fff5f5{% elif rec.priority == 'medium' %}#fff8e1{% else %}#f0f8ff{% endif %}; 
+                        padding: 1.5rem; border-radius: 12px; 
+                        border-left: 4px solid {% if rec.priority == 'high' %}#dc3545{% elif rec.priority == 'medium' %}#ffc107{% else %}#17a2b8{% endif %};">
+                <div style="display: flex; align-items: start; gap: 1rem;">
+                    <div style="font-size: 2rem;">{{ rec.icon }}</div>
+                    <div style="flex: 1;">
+                        <h4 style="color: #333; margin-bottom: 0.5rem;">{{ rec.title }}</h4>
+                        <p style="color: #6c757d; margin-bottom: 1rem;">{{ rec.description }}</p>
+                        
+                        {% if rec.action_url %}
+                        <a href="{{ rec.action_url }}" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                            {{ rec.action_text }}
+                        </a>
+                        {% endif %}
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <div style="background: {% if rec.priority == 'high' %}#dc3545{% elif rec.priority == 'medium' %}#ffc107{% else %}#17a2b8{% endif %}; 
+                                    color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; margin-bottom: 0.5rem;">
+                            {% if rec.priority == 'high' %}Yuqori
+                            {% elif rec.priority == 'medium' %}O'rtacha
+                            {% else %}Past{% endif %}
+                        </div>
+                        <div style="color: #6c757d; font-size: 0.8rem;">{{ rec.estimated_time }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 2rem; color: #6c757d;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🎉</div>
+            <h4>Ajoyib!</h4>
+            <p>Sizda hozircha muhim kamchiliklar yo'q. Davom eting!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Weak Categories -->
+    {% if weak_categories %}
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">📚 Kuchsiz mavzular</h3>
+        <p style="color: #6c757d; margin-bottom: 1.5rem;">
+            Quyidagi mavzularda ko'proq mashq qilishingiz tavsiya etiladi
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem;">
+            {% for weak_cat in weak_categories %}
+            <div style="background: #fff3cd; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #ffc107;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                    <h4 style="color: #333; margin: 0;">{{ weak_cat.category.name_uz }}</h4>
+                    <span style="background: #dc3545; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">
+                        {{ weak_cat.average_score|floatformat:1 }}/20
+                    </span>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    <div style="background: #e9ecef; height: 6px; border-radius: 3px; overflow: hidden;">
+                        <div style="background: #dc3545; height: 100%; width: {% widthratio weak_cat.average_score 20 100 %}%; transition: width 0.3s;"></div>
+                    </div>
+                </div>
+
+                <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">
+                    {{ weak_cat.total_attempts }} ta urinish • O'rtacha: {{ weak_cat.average_score|floatformat:1 }} ball
+                </p>
+
+                <!-- Study Materials -->
+                {% if weak_cat.education_content %}
+                <div style="margin-bottom: 1rem;">
+                    <h5 style="color: #333; margin-bottom: 0.5rem; font-size: 0.9rem;">Tavsiya etilgan materiallar:</h5>
+                    {% for content in weak_cat.education_content %}
+                    <div style="background: white; padding: 0.75rem; border-radius: 6px; margin-bottom: 0.5rem; font-size: 0.8rem;">
+                        <span style="color: #667eea;">{{ content.content_type|capfirst }}:</span> {{ content.title }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div style="display: flex; gap: 0.5rem;">
+                    <a href="{% url 'quiz:take_category_test' weak_cat.category.id %}" 
+                       class="btn" style="font-size: 0.8rem; padding: 0.5rem 1rem; flex: 1;">
+                        Test topshirish
+                    </a>
+                    <a href="{% url 'quiz:education_category' weak_cat.category.id %}" 
+                       class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.5rem 1rem; flex: 1;">
+                        O'rganish
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Study Plan -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">📅 Shaxsiy o'quv rejasi</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+            {% for day in study_plan %}
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border-top: 4px solid #667eea;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h4 style="color: #333; margin: 0;">{{ day.day_name }}</h4>
+                    <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">
+                        {{ day.duration }} daqiqa
+                    </span>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
+                    {% for activity in day.activities %}
+                    <div style="display: flex; align-items: center; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                        <span style="margin-right: 0.5rem;">{{ activity.icon }}</span>
+                        <span style="color: #333;">{{ activity.title }}</span>
+                        <span style="color: #6c757d; margin-left: auto;">{{ activity.time }}min</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div style="background: #e3f2fd; padding: 0.75rem; border-radius: 6px; font-size: 0.8rem; color: #1976d2;">
+                    💡 {{ day.tip }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Progress Tracking -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">📈 Taraqqiyot kuzatuvi</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+            <div style="text-align: center; background: #f8f9fa; padding: 1.5rem; border-radius: 12px;">
+                <div style="font-size: 2.5rem; color: #28a745; margin-bottom: 1rem;">📊</div>
+                <h4 style="color: #333; margin-bottom: 0.5rem;">Haftalik maqsad</h4>
+                <div style="font-size: 1.5rem; font-weight: bold; color: #28a745; margin-bottom: 0.5rem;">
+                    {{ weekly_goal.completed }}/{{ weekly_goal.target }}
+                </div>
+                <div style="background: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div style="background: #28a745; height: 100%; width: {% widthratio weekly_goal.completed weekly_goal.target 100 %}%; transition: width 0.3s;"></div>
+                </div>
+                <p style="color: #6c757d; font-size: 0.8rem; margin-top: 0.5rem;">test topshirish</p>
+            </div>
+
+            <div style="text-align: center; background: #f8f9fa; padding: 1.5rem; border-radius: 12px;">
+                <div style="font-size: 2.5rem; color: #17a2b8; margin-bottom: 1rem;">🎯</div>
+                <h4 style="color: #333; margin-bottom: 0.5rem;">Keyingi milestone</h4>
+                <div style="font-size: 1.2rem; font-weight: bold; color: #17a2b8; margin-bottom: 0.5rem;">
+                    {{ next_milestone.title }}
+                </div>
+                <p style="color: #6c757d; font-size: 0.8rem;">{{ next_milestone.description }}</p>
+            </div>
+
+            <div style="text-align: center; background: #f8f9fa; padding: 1.5rem; border-radius: 12px;">
+                <div style="font-size: 2.5rem; color: #ffc107; margin-bottom: 1rem;">⭐</div>
+                <h4 style="color: #333; margin-bottom: 0.5rem;">Motivatsiya</h4>
+                <div style="font-size: 1.2rem; font-weight: bold; color: #ffc107; margin-bottom: 0.5rem;">
+                    {{ motivation.streak }} kun
+                </div>
+                <p style="color: #6c757d; font-size: 0.8rem;">{{ motivation.message }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Smart Suggestions -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">🤖 Aqlli tavsiyalar</h3>
+        
+        <div style="display: grid; gap: 1rem;">
+            {% for suggestion in smart_suggestions %}
+            <div style="background: #e8f5e8; padding: 1rem; border-radius: 8px; border-left: 4px solid #28a745;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div style="font-size: 1.5rem;">{{ suggestion.icon }}</div>
+                    <div style="flex: 1;">
+                        <h5 style="color: #333; margin-bottom: 0.5rem;">{{ suggestion.title }}</h5>
+                        <p style="color: #6c757d; margin: 0; font-size: 0.9rem;">{{ suggestion.description }}</p>
+                    </div>
+                    {% if suggestion.confidence %}
+                    <div style="text-align: center;">
+                        <div style="background: #28a745; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.7rem;">
+                            {{ suggestion.confidence }}% ishonch
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="text-center">
+        <a href="{% url 'quiz:categories' %}" class="btn" style="margin-right: 1rem;">Test topshirish</a>
+        <a href="{% url 'quiz:education' %}" class="btn btn-secondary" style="margin-right: 1rem;">O'rganish</a>
+        <a href="{% url 'quiz:statistics' %}" class="btn btn-secondary" style="margin-right: 1rem;">Statistika</a>
+        <a href="{% url 'home' %}" class="btn btn-secondary">Bosh sahifa</a>
+    </div>
+</div>
+{% endblock %}

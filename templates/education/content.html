@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ content.title }} - Ta'lim - Avtotest{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="mb-3">
+        <a href="{% url 'education:category' content.category.id %}" class="btn btn-secondary">
+            ⬅ {{ content.category.name_uz }}ga qaytish
+        </a>
+    </div>
+    
+    <h1>{{ content.title }}</h1>
+    
+    {% if content.content_type == 'video' and content.video_url %}
+        <div class="video-container">
+            {% if 'youtube.com' in content.video_url or 'youtu.be' in content.video_url %}
+                <!-- YouTube embed -->
+                {% with video_id=content.video_url|slice:"-11:" %}
+                <iframe src="https://www.youtube.com/embed/{{ video_id }}" 
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen></iframe>
+                {% endwith %}
+            {% else %}
+                <!-- Generic video player -->
+                <video controls style="width: 100%; border-radius: 8px;">
+                    <source src="{{ content.video_url }}" type="video/mp4">
+                    Sizning brauzeringiz video ni qo'llab-quvvatlamaydi.
+                </video>
+            {% endif %}
+        </div>
+    {% endif %}
+    
+    {% if content.content_type == 'image' and content.image %}
+        <div class="text-center mb-3">
+            {% load static %}
+            <img src="{{ content.image.url }}" 
+                 alt="{{ content.title }}" 
+                 class="content-image">
+        </div>
+    {% endif %}
+    
+    {% if content.text_content %}
+        <div class="content-text">
+            {{ content.text_content|linebreaks }}
+        </div>
+    {% endif %}
+    
+    <div class="mt-4">
+        <a href="{% url 'quiz:take_category_test' content.category.id %}" class="btn btn-primary">
+            Test topshirish
+        </a>
+    </div>
+</div>
+
+{% if related_content %}
+<div class="card">
+    <h3>Shunga o'xshash materiallar</h3>
+    <div class="row">
+        {% for item in related_content %}
+        <div class="col-md-4">
+            <div class="card">
+                <h5>{{ item.title }}</h5>
+                {% if item.content_type == 'text' and item.text_content %}
+                    <p>{{ item.text_content|truncatewords:15 }}</p>
+                {% endif %}
+                <a href="{% url 'education:content' item.id %}" class="btn btn-sm btn-outline-primary">
+                    Ko'rish
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<style>
+.video-container {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    margin: 2rem 0;
+}
+
+.video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+}
+
+.content-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.content-text {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #333;
+}
+
+.btn-outline-primary {
+    color: #667eea;
+    border-color: #667eea;
+    background: transparent;
+}
+
+.btn-outline-primary:hover {
+    background: #667eea;
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+</style>
+{% endblock %}

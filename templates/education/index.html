@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Ta'lim - Avtotest{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>🎓 Ta'lim markazi</h1>
+    <p class="mb-3">Haydovchilik guvohnomasi olish uchun zarur bilimlarni o'rganing</p>
+</div>
+
+<div class="row">
+    {% for category in categories %}
+    <div class="col-md-6">
+        <div class="card">
+            <h3>{{ category.icon }} {{ category.name_uz }}</h3>
+            <p>{{ category.description|truncatewords:20 }}</p>
+            
+            {% if category.education_materials.exists %}
+                <div class="mt-2">
+                    <small class="text-muted">
+                        {{ category.education_materials.count }} ta material mavjud
+                    </small>
+                </div>
+            {% endif %}
+            
+            <div class="mt-3">
+                <a href="{% url 'education:category' category.id %}" class="btn btn-primary">
+                    O'rganish
+                </a>
+                <a href="{% url 'quiz:take_category_test' category.id %}" class="btn btn-secondary">
+                    Test topshirish
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-md-12">
+        <div class="card text-center">
+            <h3>Hozircha ta'lim materiallari mavjud emas</h3>
+            <p>Tez orada yangi materiallar qo'shiladi!</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

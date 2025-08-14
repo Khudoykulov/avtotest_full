@@ -21,8 +21,8 @@
                 <div id="current-question" style="font-size: 1.5rem; font-weight: bold; color: #333;">1/{{ questions.count }}</div>
             </div>
             <div style="text-align: center; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
-                <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 0.5rem;">TO'G'RI JAVOBLAR</div>
-                <div id="correct-count" style="font-size: 1.5rem; font-weight: bold; color: #28a745;">0</div>
+                <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 0.5rem;">NATIJA</div>
+                <div id="correct-count" style="font-size: 1.5rem; font-weight: bold; color: #6c757d;">?</div>
             </div>
             <div style="text-align: center; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
                 <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 0.5rem;">QOLGAN VAQT</div>
@@ -151,49 +151,27 @@ function loadQuestion(index) {
     // Update current question display
     document.getElementById('current-question').textContent = `${index + 1}/${questions.length}`;
     
-    // Restore previous answer if exists and show results
+    // Restore previous answer if exists - but only show selection, not results
     if (userAnswers[question.id]) {
         const selectedAnswerId = userAnswers[question.id];
         
-        // Show results for all answers
+        // Only show which answer was selected, not the results
         const labels = container.querySelectorAll('label');
         labels.forEach(label => {
             const input = label.querySelector('input');
-            const answer = question.answers.find(a => a.id == input.value);
             
-            if (answer.correct) {
-                // Show correct answer in green
-                label.style.borderColor = '#28a745';
-                label.style.background = '#d4edda';
-                label.style.fontWeight = 'bold';
-                const icon = document.createElement('span');
-                icon.className = 'result-icon';
-                icon.innerHTML = ' ✅';
-                icon.style.color = '#28a745';
-                icon.style.fontSize = '1.2rem';
-                label.appendChild(icon);
-            } else if (input.value == selectedAnswerId) {
-                // Show selected wrong answer in red
-                label.style.borderColor = '#dc3545';
-                label.style.background = '#f8d7da';
+            if (input.value == selectedAnswerId) {
+                // Highlight selected answer
+                label.style.borderColor = '#667eea';
+                label.style.background = '#e3f2fd';
                 label.style.fontWeight = 'bold';
                 input.checked = true;
-                const icon = document.createElement('span');
-                icon.className = 'result-icon';
-                icon.innerHTML = ' ❌';
-                icon.style.color = '#dc3545';
-                icon.style.fontSize = '1.2rem';
-                label.appendChild(icon);
             } else {
-                // Other wrong answers in light gray
+                // Keep other answers normal
                 label.style.borderColor = '#e9ecef';
-                label.style.background = '#f8f9fa';
-                label.style.color = '#6c757d';
+                label.style.background = 'white';
+                label.style.fontWeight = 'normal';
             }
-            
-            // Disable all inputs
-            input.disabled = true;
-            label.style.cursor = 'not-allowed';
         });
     }
 }
@@ -233,7 +211,54 @@ function selectAnswer(questionId, answerId, element) {
     updateProgress();
 }
 
+function showQuestionResult(questionIndex) {
+    const question = questions[questionIndex];
+    if (!question || !userAnswers[question.id]) {
+        return; // No answer to show result for
+    }
+    
+    const selectedAnswerId = userAnswers[question.id];
+    const selectedAnswer = question.answers.find(a => a.id == selectedAnswerId);
+    const isCorrect = selectedAnswer && selectedAnswer.correct;
+    
+    // Update navigation button with result
+    const navBtn = document.querySelector(`[data-question="${questionIndex + 1}"]`);
+    if (isCorrect) {
+        navBtn.style.background = '#28a745';  // Green for correct
+        navBtn.innerHTML = `${questionIndex + 1} ✅`;
+        navBtn.style.borderColor = '#28a745';
+    } else {
+        navBtn.style.background = '#dc3545';  // Red for incorrect  
+        navBtn.innerHTML = `${questionIndex + 1} ❌`;
+        navBtn.style.borderColor = '#dc3545';
+    }
+    navBtn.style.color = 'white';
+    
+    // Update correct count
+    updateRealCorrectCount();
+}
+
+function updateRealCorrectCount() {
+    // Calculate correct answers from navigation buttons that show results
+    let correctCount = 0;
+    const buttons = document.querySelectorAll('.question-nav-btn');
+    buttons.forEach((btn) => {
+        if (btn.innerHTML.includes('✅')) {
+            correctCount++;
+        }
+    });
+    
+    // Only show count if there are any results shown
+    if (correctCount > 0 || document.querySelector('.question-nav-btn[style*="dc3545"]')) {
+        document.getElementById('correct-count').textContent = correctCount;
+        document.getElementById('correct-count').style.color = '#28a745';
+    }
+}
+
 function nextQuestion() {
+    // Show result for current question before moving
+    showQuestionResult(currentQuestionIndex);
+    
     if (currentQuestionIndex < questions.length - 1) {
         loadQuestion(currentQuestionIndex + 1);
         updateQuestionNavigation();
@@ -248,6 +273,9 @@ function nextQuestion() {
 }
 
 function previousQuestion() {
+    // Show result for current question before moving
+    showQuestionResult(currentQuestionIndex);
+    
     if (currentQuestionIndex > 0) {
         loadQuestion(currentQuestionIndex - 1);
         updateQuestionNavigation();
@@ -315,19 +343,33 @@ function updateQuestionNavigation() {
             } else if (isAnswered) {
                 // Answered questions - allow clicking to review
                 btn.onclick = () => {
+                    // Show result for current question before moving
+                    showQuestionResult(currentQuestionIndex);
                     loadQuestion(index);
                     updateQuestionNavigation();
                     updateNavigationButtons();
                 };
-                const selectedAnswer = question.answers.find(a => a.id == isAnswered);
-                const isCorrect = selectedAnswer && selectedAnswer.correct;
                 
-                btn.style.background = isCorrect ? '#28a745' : '#dc3545';
+                // Check if result has been shown for this question
+                if (btn.innerHTML.includes('✅')) {
+                    // Keep green for correct
+                    btn.style.background = '#28a745';
+                    btn.style.borderColor = '#28a745';
+                    btn.innerHTML = `${index + 1} ✅`;
+                } else if (btn.innerHTML.includes('❌')) {
+                    // Keep red for incorrect
+                    btn.style.background = '#dc3545';
+                    btn.style.borderColor = '#dc3545';
+                    btn.innerHTML = `${index + 1} ❌`;
+                } else {
+                    // Blue for answered but result not shown yet
+                    btn.style.background = '#667eea';
+                    btn.style.borderColor = '#667eea';
+                    btn.innerHTML = `${index + 1} ✓`;
+                }
                 btn.style.color = 'white';
-                btn.style.borderColor = isCorrect ? '#28a745' : '#dc3545';
                 btn.style.transform = 'scale(1)';
                 btn.style.cursor = 'pointer';
-                btn.innerHTML = `${index + 1} ${isCorrect ? '✅' : '❌'}`;
             } else if (index < currentQuestionIndex) {
                 // Previous unanswered questions - locked
                 btn.onclick = null;
@@ -352,20 +394,9 @@ function updateQuestionNavigation() {
 }
 
 function updateCorrectCount() {
-    // Calculate correct answers in real-time
-    let correctCount = 0;
-    Object.entries(userAnswers).forEach(([questionId, answerId]) => {
-        const question = questions.find(q => q.id == questionId);
-        if (question) {
-            const answer = question.answers.find(a => a.id == answerId);
-            if (answer && answer.correct) {
-                correctCount++;
-            }
-        }
-    });
-    
-    // Update correct count display
-    document.getElementById('correct-count').textContent = correctCount;
+    // Don't show correct count during test - only show answered count
+    const answeredCount = Object.keys(userAnswers).length;
+    document.getElementById('correct-count').textContent = '?';
     
     // Update progress
     updateProgress();

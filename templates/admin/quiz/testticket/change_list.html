@@ -1,0 +1,13 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <li>
+        <a href="{% url 'admin:quiz_testticket_generate_all_random' %}" class="addlink" 
+           style="background: #ffc107; color: #000; border: 2px solid #ffc107;"
+           onclick="return confirm('Barcha biletlar uchun tasodifiy savollar yaratilsinmi? Mavjud savollar almashtiriladi!');">
+            🎲 Barcha biletlarga tasodifiy savollar
+        </a>
+    </li>
+{% endblock %}

@@ -177,33 +177,116 @@
     </div>
     {% endif %}
 
-    <!-- Study Plan -->
+    <!-- User Level & XP -->
     <div class="card" style="margin-bottom: 2rem;">
-        <h3 style="color: #667eea; margin-bottom: 1.5rem;">📅 Shaxsiy o'quv rejasi</h3>
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">🌟 Sizning darajangiz</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+            <div style="text-align: center; background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 2rem; border-radius: 12px;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">{{ achievements_data.level.icon }}</div>
+                <h4 style="margin-bottom: 0.5rem;">{{ achievements_data.level.title }}</h4>
+                <div style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem;">Level {{ achievements_data.level.level }}</div>
+                <div style="background: rgba(255,255,255,0.2); padding: 0.5rem; border-radius: 8px;">
+                    {{ achievements_data.total_xp }} XP
+                </div>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px;">
+                <h5 style="color: #333; margin-bottom: 1rem;">Keyingi darajaga:</h5>
+                {% if achievements_data.next_level_progress.needed_tests > 0 %}
+                <div style="margin-bottom: 0.5rem;">
+                    <span style="color: #6c757d;">Kerakli testlar:</span>
+                    <strong>{{ achievements_data.next_level_progress.needed_tests }} ta</strong>
+                </div>
+                {% endif %}
+                {% if achievements_data.next_level_progress.needed_avg > 0 %}
+                <div style="margin-bottom: 0.5rem;">
+                    <span style="color: #6c757d;">Kerakli o'rtacha ball:</span>
+                    <strong>{{ achievements_data.next_level_progress.needed_avg }}+</strong>
+                </div>
+                {% endif %}
+                {% if achievements_data.next_level_progress.needed_tests == 0 and achievements_data.next_level_progress.needed_avg == 0 %}
+                <div style="color: #28a745; font-weight: bold;">
+                    🎉 Maksimal darajada!
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievements -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">🏆 Yutuqlaringiz</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+            {% for achievement in achievements_data.achievements %}
+            <div style="background: {% if achievement.type == 'unlocked' %}#d4edda{% else %}#f8f9fa{% endif %}; 
+                        border: 2px solid {% if achievement.type == 'unlocked' %}#28a745{% else %}#dee2e6{% endif %}; 
+                        padding: 1rem; border-radius: 8px; position: relative;
+                        {% if achievement.type == 'locked' %}opacity: 0.7;{% endif %}">
+                
+                <div style="display: flex; align-items: center; margin-bottom: 0.75rem;">
+                    <span style="font-size: 2rem; margin-right: 1rem;">{{ achievement.icon }}</span>
+                    <div>
+                        <h5 style="margin: 0; color: #333;">{{ achievement.title }}</h5>
+                        <p style="margin: 0; color: #6c757d; font-size: 0.9rem;">{{ achievement.description }}</p>
+                    </div>
+                </div>
+                
+                {% if achievement.type == 'locked' %}
+                <div style="background: #e9ecef; height: 6px; border-radius: 3px; overflow: hidden;">
+                    <div style="background: #667eea; height: 100%; width: {{ achievement.progress }}%; transition: width 0.3s;"></div>
+                </div>
+                <div style="text-align: right; font-size: 0.8rem; color: #6c757d; margin-top: 0.25rem;">
+                    {{ achievement.progress }}%
+                </div>
+                {% else %}
+                <div style="position: absolute; top: 0.5rem; right: 0.5rem; background: #28a745; color: white; 
+                            padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.7rem; font-weight: bold;">
+                    ✓ OLDI
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Daily Challenges -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #667eea; margin-bottom: 1.5rem;">⚡ Kunlik vazifalar</h3>
         
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-            {% for day in study_plan %}
-            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; border-top: 4px solid #667eea;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h4 style="color: #333; margin: 0;">{{ day.day_name }}</h4>
-                    <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.8rem;">
-                        {{ day.duration }} daqiqa
-                    </span>
-                </div>
-
-                <div style="margin-bottom: 1rem;">
-                    {% for activity in day.activities %}
-                    <div style="display: flex; align-items: center; margin-bottom: 0.5rem; font-size: 0.9rem;">
-                        <span style="margin-right: 0.5rem;">{{ activity.icon }}</span>
-                        <span style="color: #333;">{{ activity.title }}</span>
-                        <span style="color: #6c757d; margin-left: auto;">{{ activity.time }}min</span>
+            {% for challenge in achievements_data.challenges %}
+            <div style="background: linear-gradient(135deg, #ff9a56, #ffad56); color: white; padding: 1.5rem; border-radius: 12px; position: relative;">
+                <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                    <span style="font-size: 2.5rem; margin-right: 1rem;">{{ challenge.icon }}</span>
+                    <div>
+                        <h4 style="margin: 0;">{{ challenge.title }}</h4>
+                        <p style="margin: 0; opacity: 0.9; font-size: 0.9rem;">{{ challenge.description }}</p>
                     </div>
-                    {% endfor %}
                 </div>
-
-                <div style="background: #e3f2fd; padding: 0.75rem; border-radius: 6px; font-size: 0.8rem; color: #1976d2;">
-                    💡 {{ day.tip }}
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 8px; font-weight: bold;">
+                        {{ challenge.reward }}
+                    </div>
+                    <div style="background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem;">
+                        {{ challenge.difficulty }}
+                    </div>
                 </div>
+                
+                <div style="text-align: center; font-size: 0.9rem; opacity: 0.8;">
+                    ⏰ {{ challenge.time_left }}
+                </div>
+                
+                <a href="{% url 'quiz:categories' %}" 
+                   style="position: absolute; bottom: 1rem; right: 1rem; background: rgba(255,255,255,0.2); 
+                          color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; 
+                          font-size: 0.8rem; transition: background 0.3s;"
+                   onmouseover="this.style.background='rgba(255,255,255,0.3)'"
+                   onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                    Boshlash →
+                </a>
             </div>
             {% endfor %}
         </div>

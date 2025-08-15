@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.db.models import Avg, Count, Q, Max
 from django.db.models.functions import TruncDate
 from django.db import models
-from .models import Category, TestTicket, Question, TestResult, UserAnswer, EducationContent
+from .models import Category, TestTicket, Question, TestResult, UserAnswer, EducationContent, UserProgress
 from .ai_analytics import get_ai_insights_for_user
 import json
 from datetime import timedelta, datetime
@@ -731,6 +731,315 @@ def generate_study_plan(analysis, weak_categories):
 
     return study_plan
 
+def generate_achievements(user, user_results, analysis):
+    """Generate dynamic achievements and challenges based on database"""
+    from django.utils import timezone
+    
+    # Get or create user progress
+    progress_data = get_user_progress_data(user)
+    
+    achievements = []
+    challenges = []
+    
+    # Define all achievements with their unlock conditions
+    all_achievements = [
+        {'id': 'first_test', 'icon': '🎯', 'title': 'Birinchi qadam', 'description': 'Birinchi testingizni topshirdingiz!', 'condition': progress_data['total_tests'] >= 1},
+        {'id': 'active_learner', 'icon': '📈', 'title': 'Faol o\'quvchi', 'description': '5 ta test topshirdingiz', 'condition': progress_data['total_tests'] >= 5},
+        {'id': 'test_champion', 'icon': '🏆', 'title': 'Test chempioni', 'description': '10 ta test topshirdingiz', 'condition': progress_data['total_tests'] >= 10},
+        {'id': 'excellent_student', 'icon': '⭐', 'title': 'A\'lo o\'quvchi', 'description': 'O\'rtacha 18+ ball', 'condition': progress_data['average_score'] >= 18},
+        {'id': 'streak_master', 'icon': '🔥', 'title': 'Ketma-ketlik ustasi', 'description': f'{progress_data["current_streak"]} kun ketma-ket test', 'condition': progress_data['current_streak'] >= 7},
+        {'id': 'experienced_driver', 'icon': '🎖️', 'title': 'Tajribali haydovchi', 'description': '20 ta test topshiring', 'condition': progress_data['total_tests'] >= 20, 'max_progress': 20},
+        {'id': 'perfectionist', 'icon': '🌟', 'title': 'Mukammallik', 'description': 'O\'rtacha 19+ ball olish', 'condition': progress_data['average_score'] >= 19, 'max_progress': 19},
+        {'id': 'streak_legend', 'icon': '💎', 'title': 'Ketma-ketlik afsonasi', 'description': '30 kun ketma-ket test', 'condition': progress_data['current_streak'] >= 30, 'max_progress': 30},
+        {'id': 'master_driver', 'icon': '👑', 'title': 'Usta haydovchi', 'description': '50 ta test topshiring', 'condition': progress_data['total_tests'] >= 50, 'max_progress': 50},
+    ]
+    
+    for achievement in all_achievements:
+        if achievement['id'] in progress_data['unlocked_achievements']:
+            # Already unlocked
+            achievements.append({
+                'icon': achievement['icon'],
+                'title': achievement['title'],
+                'description': achievement['description'],
+                'type': 'unlocked',
+                'progress': 100
+            })
+        elif achievement['condition']:
+            # Just unlocked
+            achievements.append({
+                'icon': achievement['icon'],
+                'title': achievement['title'],
+                'description': achievement['description'],
+                'type': 'unlocked',
+                'progress': 100
+            })
+        else:
+            # Still locked, show progress
+            if 'max_progress' in achievement:
+                if achievement['id'] == 'experienced_driver':
+                    progress = int((progress_data['total_tests'] / achievement['max_progress']) * 100)
+                elif achievement['id'] == 'perfectionist':
+                    progress = int((progress_data['average_score'] / achievement['max_progress']) * 100) if progress_data['average_score'] > 0 else 0
+                elif achievement['id'] == 'streak_legend':
+                    progress = int((progress_data['current_streak'] / achievement['max_progress']) * 100)
+                elif achievement['id'] == 'master_driver':
+                    progress = int((progress_data['total_tests'] / achievement['max_progress']) * 100)
+                else:
+                    progress = 0
+                
+                achievements.append({
+                    'icon': achievement['icon'],
+                    'title': achievement['title'],
+                    'description': achievement['description'],
+                    'type': 'locked',
+                    'progress': min(100, progress)
+                })
+    
+    # Generate dynamic challenges
+    today_tests = user_results.filter(created_at__date=timezone.now().date()).count()
+    
+    if today_tests == 0:
+        challenges.append({
+            'icon': '🎯',
+            'title': 'Bugungi maqsad',
+            'description': 'Bugun 1 ta test topshiring',
+            'reward': '+15 XP',
+            'difficulty': 'Oson',
+            'time_left': 'Bugun'
+        })
+    
+    week_tests = user_results.filter(created_at__gte=timezone.now() - timezone.timedelta(days=7)).count()
+    if week_tests < 5:
+        challenges.append({
+            'icon': '📅',
+            'title': 'Haftalik challenge',
+            'description': '5 ta test topshiring (hafta davomida)',
+            'reward': '+50 XP',
+            'difficulty': 'O\'rta',
+            'time_left': f'{5-week_tests} ta test qoldi'
+        })
+    
+    # Perfect score challenge
+    if progress_data['total_tests'] > 0:
+        challenges.append({
+            'icon': '💎',
+            'title': 'Mukammal natija',
+            'description': 'Keyingi testda 20/20 ball oling',
+            'reward': '+30 XP',
+            'difficulty': 'Qiyin',
+            'time_left': 'Keyingi test'
+        })
+    
+    return {
+        'achievements': achievements,
+        'challenges': challenges,
+        'total_xp': progress_data['total_xp'],
+        'level': {
+            'level': progress_data['current_level'],
+            'title': progress_data['level_title'],
+            'icon': get_level_icon(progress_data['current_level'])
+        },
+        'next_level_progress': {
+            'needed_xp': progress_data['next_level_xp'],
+            'current_xp': progress_data['total_xp']
+        }
+    }
+
+def get_level_icon(level):
+    """Get icon for user level"""
+    icons = {1: '🌱', 2: '📈', 3: '⭐', 4: '🏆', 5: '👑'}
+    return icons.get(level, '🌱')
+
+def calculate_test_streak(user_results):
+    """Calculate consecutive days with tests"""
+    from django.utils import timezone
+    
+    if not user_results.exists():
+        return 0
+    
+    streak = 0
+    current_date = timezone.now().date()
+    
+    for i in range(30):  # Check last 30 days
+        check_date = current_date - timezone.timedelta(days=i)
+        if user_results.filter(created_at__date=check_date).exists():
+            streak += 1
+        else:
+            break
+    
+    return streak
+
+def get_user_level(total_tests, avg_score):
+    """Calculate user level based on tests and performance"""
+    if total_tests >= 20 and avg_score >= 18:
+        return {'level': 5, 'title': 'Ekspert haydovchi', 'icon': '👑'}
+    elif total_tests >= 15 and avg_score >= 16:
+        return {'level': 4, 'title': 'Malakali haydovchi', 'icon': '🏆'}
+    elif total_tests >= 10 and avg_score >= 14:
+        return {'level': 3, 'title': 'Tajribali o\'quvchi', 'icon': '⭐'}
+    elif total_tests >= 5:
+        return {'level': 2, 'title': 'Faol o\'quvchi', 'icon': '📈'}
+    else:
+        return {'level': 1, 'title': 'Yangi boshlovchi', 'icon': '🌱'}
+
+def get_next_level_progress(total_tests, avg_score):
+    """Calculate progress to next level"""
+    current_level = get_user_level(total_tests, avg_score)['level']
+    
+    if current_level == 1:
+        return {'needed_tests': max(0, 5 - total_tests), 'needed_avg': 0}
+    elif current_level == 2:
+        return {'needed_tests': max(0, 10 - total_tests), 'needed_avg': max(0, 14 - avg_score)}
+    elif current_level == 3:
+        return {'needed_tests': max(0, 15 - total_tests), 'needed_avg': max(0, 16 - avg_score)}
+    elif current_level == 4:
+        return {'needed_tests': max(0, 20 - total_tests), 'needed_avg': max(0, 18 - avg_score)}
+    else:
+        return {'needed_tests': 0, 'needed_avg': 0}
+
+def get_beginner_achievements():
+    """Achievements for beginners"""
+    return {
+        'achievements': [
+            {
+                'icon': '🎯',
+                'title': 'Birinchi qadam',
+                'description': 'Birinchi testingizni topshiring',
+                'type': 'locked',
+                'progress': 0
+            }
+        ],
+        'challenges': [
+            {
+                'icon': '🚀',
+                'title': 'Boshlang\'ich qadamlar',
+                'description': 'Birinchi testingizni topshiring',
+                'reward': '+10 XP',
+                'difficulty': 'Oson',
+                'time_left': 'Hoziroq'
+            }
+        ],
+        'total_xp': 0,
+        'level': {'level': 1, 'title': 'Yangi boshlovchi', 'icon': '🌱'},
+        'next_level_progress': {'needed_tests': 5, 'needed_avg': 0}
+    }
+
+def update_user_progress(user, test_result):
+    """Update user progress after completing a test"""
+    progress, created = UserProgress.objects.get_or_create(user=user)
+    
+    # Update basic stats
+    progress.total_tests_completed += 1
+    progress.total_questions_answered += test_result.total_questions
+    progress.total_correct_answers += test_result.score
+    progress.average_score = (progress.total_correct_answers / progress.total_questions_answered * 20) if progress.total_questions_answered > 0 else 0
+    
+    # Update streak
+    progress.update_streak()
+    
+    # Calculate XP rewards
+    base_xp = 10  # Base XP per test
+    score_bonus = test_result.score * 2  # 2 XP per correct answer
+    streak_bonus = progress.current_streak * 5 if progress.current_streak >= 3 else 0
+    perfect_bonus = 20 if test_result.score == test_result.total_questions else 0
+    
+    total_xp = base_xp + score_bonus + streak_bonus + perfect_bonus
+    level_up_data = progress.add_xp(total_xp)
+    
+    # Update category mastery
+    if test_result.category:
+        category_id = str(test_result.category.id)
+        current_mastery = progress.category_mastery.get(category_id, 0)
+        score_percentage = (test_result.score / test_result.total_questions) * 100
+        
+        # Update mastery (weighted average)
+        new_mastery = (current_mastery * 0.7) + (score_percentage * 0.3)
+        progress.category_mastery[category_id] = min(100, max(0, new_mastery))
+    
+    # Check and unlock achievements
+    new_achievements = check_achievements(progress, test_result)
+    
+    # Update challenges
+    update_challenges(progress, test_result)
+    
+    progress.save()
+    
+    return {
+        'xp_gained': total_xp,
+        'level_up': level_up_data,
+        'new_achievements': new_achievements,
+        'streak': progress.current_streak,
+        'total_xp': progress.total_xp,
+        'level': progress.current_level
+    }
+
+def check_achievements(progress, test_result):
+    """Check and unlock new achievements"""
+    new_achievements = []
+    
+    achievements_to_check = [
+        {'id': 'first_test', 'condition': progress.total_tests_completed >= 1, 'title': 'Birinchi qadam'},
+        {'id': 'active_learner', 'condition': progress.total_tests_completed >= 5, 'title': 'Faol o\'quvchi'},
+        {'id': 'test_champion', 'condition': progress.total_tests_completed >= 10, 'title': 'Test chempioni'},
+        {'id': 'excellent_student', 'condition': progress.average_score >= 18, 'title': 'A\'lo o\'quvchi'},
+        {'id': 'streak_master', 'condition': progress.current_streak >= 7, 'title': 'Ketma-ketlik ustasi'},
+        {'id': 'perfect_score', 'condition': test_result.score == test_result.total_questions, 'title': 'Mukammal natija'},
+        {'id': 'experienced_driver', 'condition': progress.total_tests_completed >= 20, 'title': 'Tajribali haydovchi'},
+        {'id': 'perfectionist', 'condition': progress.average_score >= 19.5, 'title': 'Mukammallik'},
+    ]
+    
+    for achievement in achievements_to_check:
+        if achievement['condition'] and achievement['id'] not in progress.unlocked_achievements:
+            progress.unlocked_achievements.append(achievement['id'])
+            new_achievements.append(achievement)
+    
+    return new_achievements
+
+def update_challenges(progress, test_result):
+    """Update user challenges"""
+    from django.utils import timezone
+    
+    # Update daily challenge
+    today = timezone.now().date()
+    daily_challenge = f"daily_{today.strftime('%Y-%m-%d')}"
+    
+    if daily_challenge not in progress.completed_challenges:
+        progress.completed_challenges.append(daily_challenge)
+        progress.add_xp(5, "Daily challenge completed")
+    
+    # Update weekly challenge
+    week_start = today - timezone.timedelta(days=today.weekday())
+    weekly_tests = TestResult.objects.filter(
+        user=progress.user,
+        created_at__date__gte=week_start
+    ).count()
+    
+    if weekly_tests >= 5:
+        weekly_challenge = f"weekly_{week_start.strftime('%Y-%m-%d')}"
+        if weekly_challenge not in progress.completed_challenges:
+            progress.completed_challenges.append(weekly_challenge)
+            progress.add_xp(20, "Weekly challenge completed")
+
+def get_user_progress_data(user):
+    """Get comprehensive user progress data"""
+    try:
+        progress = UserProgress.objects.get(user=user)
+    except UserProgress.DoesNotExist:
+        progress = UserProgress.objects.create(user=user)
+    
+    return {
+        'total_xp': progress.total_xp,
+        'current_level': progress.current_level,
+        'level_title': progress.level_title,
+        'current_streak': progress.current_streak,
+        'best_streak': progress.best_streak,
+        'total_tests': progress.total_tests_completed,
+        'average_score': round(progress.average_score, 1),
+        'unlocked_achievements': progress.unlocked_achievements,
+        'category_mastery': progress.category_mastery,
+        'next_level_xp': progress.get_next_level_xp(),
+        'improvement_rate': progress.improvement_rate
+    }
 
 def calculate_time_statistics(user_results):
     """Calculate time-related statistics"""

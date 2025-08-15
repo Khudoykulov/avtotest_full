@@ -259,12 +259,12 @@
                     </div>
                     <div class="category-info">
                         <h3>{{ category.name_uz }}</h3>
-                        <p>{{ category.education_content.count }} ta material</p>
+                        <p>{{ category.total_content_count }} ta material</p>
                     </div>
                 </div>
                 
                 <ul class="content-list">
-                    {% for content in category.education_content.all|slice:":5" %}
+                    {% for content in category.preview_content %}
                     <li class="content-item" onclick="openContent('{{ content.id }}')">
                         <div class="content-type-icon content-type-{{ content.content_type }}" style="position: relative; overflow: hidden;">
                             {% if content.content_type == 'video' and content.video_url %}
@@ -309,11 +309,15 @@
                     </li>
                     {% endfor %}
                     
-                    {% if category.education_content.count > 5 %}
+                    {% if category.total_content_count > 3 %}
                     <li style="text-align: center; padding: 1rem;">
                         <a href="{% url 'quiz:education_category' category.id %}" 
-                           style="color: #667eea; text-decoration: none; font-weight: 500;">
-                            Barchasini ko'rish ({{ category.education_content.count }} ta)
+                           style="color: #667eea; text-decoration: none; font-weight: 500; 
+                           background: #f0f4ff; padding: 0.5rem 1rem; border-radius: 8px; 
+                           display: inline-block; transition: all 0.3s;"
+                           onmouseover="this.style.background='#e0ebff'" 
+                           onmouseout="this.style.background='#f0f4ff'">
+                            📚 Barchasini ko'rish ({{ category.total_content_count }} ta)
                         </a>
                     </li>
                     {% endif %}

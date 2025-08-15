@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.db.models import Avg, Count, Q, Max
 from django.db.models.functions import TruncDate
+from django.db import models
 from .models import Category, TestTicket, Question, TestResult, UserAnswer, EducationContent
 from .ai_analytics import get_ai_insights_for_user
 import json
@@ -375,8 +376,14 @@ def education_view(request, category_id=None):
             'contents': contents
         })
     else:
-        # Show all categories with preview content
-        categories = Category.objects.prefetch_related('education_content').all()
+        # Show all categories with preview content (top 3 per category)
+        categories = Category.objects.all()
+        
+        # Har bir category uchun faqat 3 ta content olish
+        for category in categories:
+            category.preview_content = category.education_content.order_by('order', 'created_at')[:3]
+            category.total_content_count = category.education_content.count()
+            
         return render(request, 'quiz/education.html', {
             'categories': categories
         })

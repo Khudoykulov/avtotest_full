@@ -251,7 +251,11 @@
             <div class="category-card">
                 <div class="category-header">
                     <div class="category-icon">
-                        {{ category.icon|default:"📖" }}
+                        {% if category.icon %}
+                            <img src="{{ category.icon.url }}" alt="{{ category.name_uz }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">
+                        {% else %}
+                            📖
+                        {% endif %}
                     </div>
                     <div class="category-info">
                         <h3>{{ category.name_uz }}</h3>

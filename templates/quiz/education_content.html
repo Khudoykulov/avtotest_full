@@ -313,7 +313,8 @@
                                 <div style="font-size: 2rem; margin-bottom: 1rem;">⏳</div>
                                 <p>Video yuklanmoqda...</p>
                             </div>
-                            <iframe id="video-iframe" src="{{ content.video_url }}" 
+                            {% load video_filters %}
+                            <iframe id="video-iframe" src="{{ content.video_url|youtube_embed_url }}" 
                                     width="100%" height="100%" 
                                     frameborder="0" allowfullscreen
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -332,6 +333,19 @@
                                 <li>Tezligini sozlash uchun sozlamalar (⚙️) tugmasidan foydalaning</li>
                                 <li>Tushunmagan qismlarni qayta ko'rish uchun video vaqtini sozlang</li>
                             </ul>
+                        </div>
+                        
+                        <div class="video-url-info" style="background: #e8f4fd; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border-left: 4px solid #007bff;">
+                            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                                <span style="color: #007bff; font-size: 1.2rem;">🔗</span>
+                                <strong>Video URL manzili</strong>
+                            </div>
+                            <div style="background: white; padding: 0.75rem; border-radius: 4px; font-family: monospace; font-size: 0.9rem; border: 1px solid #dee2e6; word-break: break-all;">
+                                {{ content.video_url }}
+                            </div>
+                            <small style="color: #666; margin-top: 0.5rem; display: block;">
+                                Agar video yuklanmasa, yuqoridagi URL manzilini brauzerda ochib ko'ring
+                            </small>
                         </div>
                     {% else %}
                         <div class="video-container">

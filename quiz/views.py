@@ -420,7 +420,7 @@ def recommendations_view(request):
             'estimated_study_days': 30,
             'priority_recommendations': get_beginner_recommendations(),
             'weak_categories': [],
-            'study_plan': get_beginner_study_plan(),
+            'achievements_data': get_beginner_achievements(),
             'weekly_goal': {'completed': 0, 'target': 5},
             'next_milestone': {'title': 'Birinchi test', 'description': 'Birinchi testingizni topshiring'},
             'motivation': {'streak': 0, 'message': 'Boshlang\'ich darajada'},
@@ -437,8 +437,8 @@ def recommendations_view(request):
     # Find weak categories with detailed analysis
     weak_categories = analyze_weak_categories(request.user, user_results)
 
-    # Generate personalized study plan
-    study_plan = generate_study_plan(performance_analysis, weak_categories)
+    # Generate dynamic achievements and challenges
+    achievements_data = generate_achievements(request.user, user_results, performance_analysis)
 
     # Calculate progress tracking metrics
     progress_metrics = calculate_progress_metrics(request.user, user_results)
@@ -453,7 +453,7 @@ def recommendations_view(request):
         'estimated_study_days': performance_analysis['estimated_study_days'],
         'priority_recommendations': recommendations,
         'weak_categories': weak_categories,
-        'study_plan': study_plan,
+        'achievements_data': achievements_data,
         'weekly_goal': progress_metrics['weekly_goal'],
         'next_milestone': progress_metrics['next_milestone'],
         'motivation': progress_metrics['motivation'],
@@ -495,7 +495,7 @@ def analyze_user_performance(user, user_results):
 
     # Analyze improvement trend
     recent_tests = user_results[:5]
-    older_tests = user_results[5:10] if user_results.count() > 5 else []
+    older_tests = user_results[5:10] if user_results.count() > 5 else user_results.none()
 
     improvement_trend = 'stable'
     if recent_tests.exists() and older_tests.exists():
@@ -611,10 +611,25 @@ def analyze_weak_categories(user, user_results):
                 # Get specific education content for this category
                 education_content = EducationContent.objects.filter(category=category)[:3]
 
+                # Get detailed attempt results
+                detailed_attempts = []
+                for result in category_results[:3]:  # Son 3ta urinish
+                    correct_count = result.score
+                    total_questions = result.total_questions
+                    wrong_count = total_questions - correct_count
+                    detailed_attempts.append({
+                        'date': result.created_at,
+                        'correct_count': correct_count,
+                        'wrong_count': wrong_count,
+                        'total_questions': total_questions,
+                        'percentage': round((correct_count / total_questions) * 100, 1)
+                    })
+                
                 weak_categories.append({
                     'category': category,
                     'average_score': round(avg_score, 1),
                     'total_attempts': category_results.count(),
+                    'detailed_attempts': detailed_attempts,
                     'education_content': education_content,
                     'improvement_potential': calculate_improvement_potential(category_results),
                     'difficulty_level': get_category_difficulty(avg_score)

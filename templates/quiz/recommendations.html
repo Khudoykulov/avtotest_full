@@ -119,6 +119,35 @@
                 <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">
                     {{ weak_cat.total_attempts }} ta urinish • O'rtacha: {{ weak_cat.average_score|floatformat:1 }} ball
                 </p>
+                
+                <!-- Detailed Attempts -->
+                {% if weak_cat.detailed_attempts %}
+                <div style="margin-bottom: 1.5rem;">
+                    <h5 style="color: #333; margin-bottom: 0.75rem; font-size: 0.9rem;">So'nggi urinishlar:</h5>
+                    <div style="display: grid; gap: 0.5rem;">
+                        {% for attempt in weak_cat.detailed_attempts %}
+                        <div style="background: white; padding: 0.75rem; border-radius: 6px; border: 1px solid #dee2e6; font-size: 0.85rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #333; font-weight: 500;">
+                                    {{ attempt.date|date:"d.m.Y" }}
+                                </span>
+                                <div style="display: flex; gap: 1rem; align-items: center;">
+                                    <span style="color: #28a745; font-weight: bold;">
+                                        ✅ {{ attempt.correct_count }}
+                                    </span>
+                                    <span style="color: #dc3545; font-weight: bold;">
+                                        ❌ {{ attempt.wrong_count }}
+                                    </span>
+                                    <span style="background: {% if attempt.percentage >= 70 %}#28a745{% else %}#dc3545{% endif %}; color: white; padding: 0.2rem 0.5rem; border-radius: 10px; font-size: 0.75rem; font-weight: bold;">
+                                        {{ attempt.percentage }}%
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
 
                 <!-- Study Materials -->
                 {% if weak_cat.education_content %}

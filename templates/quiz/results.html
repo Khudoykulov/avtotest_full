@@ -63,7 +63,7 @@
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 0 2rem;
         }
@@ -137,30 +137,263 @@
             font-size: 0.9rem;
         }
 
-        .weak-topics {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            padding: 1.5rem;
+        /* Recommendations section */
+        .recommendations {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 2rem;
             margin: 2rem 0;
         }
 
-        .weak-topics h3 {
-            color: #856404;
+        .recommendations h3 {
+            color: #495057;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .recommendation-item {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .recommendation-item.success {
+            border-left-color: #28a745;
+        }
+
+        .recommendation-item.warning {
+            border-left-color: #ffc107;
+        }
+
+        .recommendation-item.danger {
+            border-left-color: #dc3545;
+        }
+
+        .recommendation-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .recommendation-description {
+            color: #6c757d;
             margin-bottom: 1rem;
         }
 
-        .topic-list {
-            list-style: none;
+        .recommendation-action {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background 0.3s;
         }
 
-        .topic-item {
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #ffeaa7;
+        .recommendation-action:hover {
+            background: #5a6fd8;
         }
 
-        .topic-item:last-child {
-            border-bottom: none;
+        /* Detailed answers section */
+        .detailed-answers {
+            margin: 2rem 0;
+        }
+
+        .answers-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #495057;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 0.5rem;
+        }
+
+        .question-item {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .question-item.correct {
+            border-color: #28a745;
+            background: #f8fff9;
+        }
+
+        .question-item.incorrect {
+            border-color: #dc3545;
+            background: #fff8f8;
+        }
+
+        .question-header {
+            padding: 1rem 1.5rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .question-header.correct {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .question-header.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .question-category {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .question-body {
+            padding: 1.5rem;
+        }
+
+        .answer-option {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .answer-option.user-selected {
+            background: #fff3cd;
+            border-color: #ffeaa7;
+        }
+
+        .answer-option.correct {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .answer-option.user-selected.incorrect {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .answer-label {
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .explanation {
+            background: #e7f3ff;
+            border: 1px solid #b6d7ff;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .explanation-title {
+            font-weight: bold;
+            color: #0066cc;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Weak categories section */
+        .weak-categories {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .category-item {
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: #fff3cd;
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .category-name {
+            font-weight: bold;
+            color: #856404;
+        }
+
+        .category-stats {
+            color: #856404;
+            font-size: 0.9rem;
+        }
+
+        .education-materials {
+            margin-top: 1rem;
+        }
+
+        .material-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .material-icon {
+            font-size: 1.5rem;
+        }
+
+        .material-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .material-link:hover {
+            text-decoration: underline;
+        }
+
+        /* AI insights section */
+        .ai-insights {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .ai-insights h3 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .ai-analysis {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            line-height: 1.6;
         }
 
         .actions {
@@ -168,6 +401,7 @@
             gap: 1rem;
             justify-content: center;
             flex-wrap: wrap;
+            margin-top: 2rem;
         }
 
         .btn {
@@ -195,6 +429,38 @@
             background: linear-gradient(135deg, #28a745, #20c997);
         }
 
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            padding: 0.25rem;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 0.75rem;
+            border-radius: 6px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .tab.active {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         @media (max-width: 768px) {
             .nav {
                 flex-direction: column;
@@ -211,6 +477,10 @@
 
             .container {
                 padding: 0 1rem;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -232,6 +502,7 @@
     </header>
 
     <div class="container">
+        <!-- Main Results Card -->
         <div class="results-card">
             <div class="results-header {% if test_result.passed %}passed{% else %}failed{% endif %}">
                 <div class="result-icon">
@@ -266,7 +537,7 @@
                         <div class="detail-label">Noto'g'ri javoblar</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-value">{% widthratio test_result.score test_result.total_questions 100 %}%</div>
+                        <div class="detail-value">{{ percentage }}%</div>
                         <div class="detail-label">Natija foizi</div>
                     </div>
                     <div class="detail-item">
@@ -281,33 +552,403 @@
                     </div>
                 </div>
 
-                {% if weak_topics %}
-                <div class="weak-topics">
-                    <h3>🎯 Kuchsiz mavzular</h3>
-                    <p>Quyidagi mavzularga ko'proq e'tibor bering:</p>
-                    <ul class="topic-list">
-                        {% for topic in weak_topics %}
-                        <li class="topic-item">
-                            <strong>{{ topic.category }}</strong> - {{ topic.mistakes }} ta xato
-                        </li>
-                        {% endfor %}
-                    </ul>
+                <!-- AI Analysis Button -->
+                <div style="text-align: center; margin: 2rem 0;">
+                    <button id="aiAnalysisBtn" class="btn" style="background: linear-gradient(135deg, #ff6b6b, #ee5a24); position: relative;">
+                        🤖 AI o'rganamiz
+                        <div id="aiLoader" style="display: none; position: absolute; right: 10px; top: 50%; transform: translateY(-50%);">
+                            <div style="width: 20px; height: 20px; border: 2px solid #ffffff40; border-top: 2px solid white; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        </div>
+                    </button>
                 </div>
-                {% endif %}
 
-                <div class="actions">
-                    {% if test_result.passed %}
-                        <a href="{% url 'quiz:tickets' %}" class="btn btn-success">Keyingi test</a>
-                        <a href="{% url 'quiz:statistics' %}" class="btn btn-secondary">Statistika</a>
-                        <a href="{% url 'quiz:recommendations' %}" class="btn btn-secondary">Tavsiyalar</a>
-                    {% else %}
-                        <a href="{% url 'quiz:education' %}" class="btn">O'rganish</a>
-                        <a href="{% url 'quiz:recommendations' %}" class="btn">Tavsiyalar</a>
-                        <a href="{% url 'quiz:categories' %}" class="btn btn-secondary">Qayta urinish</a>
-                    {% endif %}
+                <!-- AI Insights Section (Initially Hidden) -->
+                <div id="aiInsightsSection" class="ai-insights" style="display: none;">
+                    <h3>🤖 AI Tahlili</h3>
+                    <div id="aiAnalysisContent" class="ai-analysis">
+                        <!-- AI content will be loaded here -->
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('overview')">Umumiy</button>
+            <button class="tab" onclick="showTab('wrong-answers')">❌ Xato savollar</button>
+            <button class="tab" onclick="showTab('recommendations')">Tavsiyalar</button>
+            <button class="tab" onclick="showTab('detailed')">Batafsil</button>
+            <button class="tab" onclick="showTab('weak-categories')">Zaif mavzular</button>
+        </div>
+
+        <!-- Tab Contents -->
+        <div id="overview" class="tab-content active">
+            <!-- Quick recommendations -->
+            {% if test_recommendations %}
+            <div class="recommendations">
+                <h3>💡 Shaxsiy tavsiyalar</h3>
+                {% for rec in test_recommendations %}
+                <div class="recommendation-item {{ rec.priority }}">
+                    <div class="recommendation-title">{{ rec.title }}</div>
+                    <div class="recommendation-description">{{ rec.description }}</div>
+                    <a href="{{ rec.url }}" class="recommendation-action">{{ rec.action }}</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div id="wrong-answers" class="tab-content">
+            <div class="answers-section">
+                <h2 class="section-title">❌ Xato qilingan savollar</h2>
+                {% if incorrect_answers %}
+                    <p style="color: #dc3545; margin-bottom: 2rem; font-weight: 500;">
+                        Siz {{ incorrect_answers.count }} ta savolla xato qildingiz. Quyida har birining to'g'ri javobi ko'rsatilgan:
+                    </p>
+                    
+                    {% for answer_detail in detailed_answers %}
+                        {% if not answer_detail.is_correct %}
+                        <div class="question-item incorrect" style="margin-bottom: 2rem;">
+                            <div class="question-header incorrect">
+                                <div class="question-text">
+                                    ❌ {{ answer_detail.question.question_text }}
+                                </div>
+                                <div class="question-category">{{ answer_detail.category.name_uz }}</div>
+                            </div>
+                            
+                            <div class="question-body">
+                                {% if answer_detail.question.image %}
+                                <div style="text-align: center; margin: 1rem 0;">
+                                    <img src="{{ answer_detail.question.image.url }}" alt="Savol rasmi" style="max-width: 100%; height: auto; border-radius: 8px;">
+                                </div>
+                                {% endif %}
+                                
+                                <div style="margin-bottom: 1rem;">
+                                    <strong style="color: #dc3545;">Sizning javobingiz:</strong>
+                                    <div class="answer-option user-selected incorrect" style="margin: 0.5rem 0;">
+                                        {{ answer_detail.user_answer.answer_text }}
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-bottom: 1rem;">
+                                    <strong style="color: #28a745;">To'g'ri javob:</strong>
+                                    <div class="answer-option correct" style="margin: 0.5rem 0;">
+                                        {{ answer_detail.correct_answer.answer_text }}
+                                    </div>
+                                </div>
+                                
+                                {% if answer_detail.explanation %}
+                                <div class="explanation">
+                                    <div class="explanation-title">💡 Tushuntirish:</div>
+                                    {{ answer_detail.explanation }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <!-- Xato kategoriyalar bo'yicha ta'lim materiallari -->
+                    {% if weak_categories %}
+                    <div style="margin-top: 3rem;">
+                        <h3 style="color: #dc3545; margin-bottom: 2rem; border-bottom: 2px solid #dc3545; padding-bottom: 0.5rem;">
+                            📚 Xato qilgan mavzular bo'yicha ta'lim materiallari
+                        </h3>
+                        
+                        {% for weak_cat in weak_categories %}
+                        <div style="background: #fff; border: 1px solid #dee2e6; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                                <h4 style="color: #dc3545; margin: 0;">
+                                    ⚠️ {{ weak_cat.category.name_uz }}
+                                </h4>
+                                <span style="background: #dc3545; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem;">
+                                    {{ weak_cat.wrong_count }} ta xato
+                                </span>
+                            </div>
+                            
+                            <p style="color: #666; margin-bottom: 1.5rem;">
+                                Bu mavzu bo'yicha {{ weak_cat.wrong_count }} ta xato qildingiz. Bilimlaringizni mustahkamlash uchun quyidagi materiallarni o'rganing:
+                            </p>
+                            
+                            {% if weak_cat.education_materials %}
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                                {% for material in weak_cat.education_materials %}
+                                <div style="border: 1px solid #e9ecef; border-radius: 8px; padding: 1rem; background: #f8f9fa; transition: transform 0.2s, box-shadow 0.2s;" 
+                                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'" 
+                                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                                        <span style="font-size: 2rem;">
+                                            {% if material.content_type == 'video' %}📹
+                                            {% elif material.content_type == 'text' %}📄
+                                            {% else %}🖼️{% endif %}
+                                        </span>
+                                        <div>
+                                            <h5 style="margin: 0; color: #333;">{{ material.title }}</h5>
+                                            <small style="color: #6c757d;">
+                                                {% if material.content_type == 'video' %}Video dars
+                                                {% elif material.content_type == 'text' %}Matn material
+                                                {% else %}Rasm material{% endif %}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if material.text_content %}
+                                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem; line-height: 1.4;">
+                                        {{ material.text_content|truncatewords:15 }}...
+                                    </p>
+                                    {% endif %}
+                                    
+                                    <a href="/quiz/education/content/{{ material.id }}/" 
+                                       style="background: #667eea; color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; display: inline-block;">
+                                        📖 O'qish
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div style="text-align: center; padding: 2rem; background: #e9ecef; border-radius: 8px;">
+                                <p style="color: #6c757d; margin: 0;">Bu mavzu uchun ta'lim materiallari hali qo'shilmagan</p>
+                            </div>
+                            {% endif %}
+                            
+                            <div style="margin-top: 1.5rem; text-align: center;">
+                                <a href="/quiz/education/{{ weak_cat.category.id }}/" 
+                                   style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 0.75rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 500;">
+                                    🎯 Bu mavzuni batafsil o'rganish
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 1.5rem; margin-top: 2rem;">
+                        <h4 style="color: #856404; margin-bottom: 1rem;">📚 Umumiy tavsiya:</h4>
+                        <p style="color: #856404;">
+                            Bu savollarni esingizda saqlang va shunga o'xshash mavzularda ko'proq mashq qiling. 
+                            Yuqoridagi ta'lim materiallarini o'rganib, bilimlaringizni mustahkamlang.
+                        </p>
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: 3rem; background: #d4edda; border-radius: 12px;">
+                        <div style="font-size: 4rem; margin-bottom: 1rem;">🎉</div>
+                        <h3 style="color: #155724; margin-bottom: 1rem;">Mukammal!</h3>
+                        <p style="color: #155724;">Siz hech qanday xato qilmadingiz!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div id="recommendations" class="tab-content">
+            <div class="answers-section">
+                <h2 class="section-title">📋 Test tavsiyalari</h2>
+                <p>Bu test asosida sizga maxsus tavsiyalar:</p>
+                
+                {% if test_recommendations %}
+                    {% for rec in test_recommendations %}
+                    <div class="recommendation-item {{ rec.priority }}">
+                        <div class="recommendation-title">{{ rec.title }}</div>
+                        <div class="recommendation-description">{{ rec.description }}</div>
+                        <a href="{{ rec.url }}" class="recommendation-action">{{ rec.action }}</a>
+                        
+                        {% if rec.materials %}
+                        <div class="education-materials">
+                            <p><strong>Tavsiya etiladigan materiallar:</strong></p>
+                            {% for material in rec.materials %}
+                            <div class="material-item">
+                                <span class="material-icon">
+                                    {% if material.content_type == 'video' %}📹
+                                    {% elif material.content_type == 'text' %}📄
+                                    {% else %}🖼️{% endif %}
+                                </span>
+                                <a href="/quiz/education/content/{{ material.id }}/" class="material-link">{{ material.title }}</a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div id="detailed" class="tab-content">
+            <div class="answers-section">
+                <h2 class="section-title">📝 Barcha savollar va javoblar</h2>
+                
+                {% for answer_detail in detailed_answers %}
+                <div class="question-item {% if answer_detail.is_correct %}correct{% else %}incorrect{% endif %}">
+                    <div class="question-header {% if answer_detail.is_correct %}correct{% else %}incorrect{% endif %}">
+                        <div class="question-text">
+                            {% if answer_detail.is_correct %}✅{% else %}❌{% endif %}
+                            {{ answer_detail.question.question_text }}
+                        </div>
+                        <div class="question-category">{{ answer_detail.category.name_uz }}</div>
+                    </div>
+                    
+                    <div class="question-body">
+                        {% for answer in answer_detail.question.answers.all %}
+                        <div class="answer-option 
+                            {% if answer == answer_detail.user_answer %}user-selected{% endif %}
+                            {% if answer.is_correct %}correct{% endif %}
+                            {% if answer == answer_detail.user_answer and not answer.is_correct %}incorrect{% endif %}">
+                            <span class="answer-label">
+                                {% if forloop.counter == 1 %}A)
+                                {% elif forloop.counter == 2 %}B)
+                                {% elif forloop.counter == 3 %}C)
+                                {% elif forloop.counter == 4 %}D)
+                                {% else %}{{ forloop.counter }}){% endif %}
+                            </span>
+                            {{ answer.answer_text }}
+                            {% if answer == answer_detail.user_answer %}
+                                <strong>(Sizning javobingiz)</strong>
+                            {% endif %}
+                            {% if answer.is_correct %}
+                                <strong>(To'g'ri javob)</strong>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        
+                        {% if answer_detail.explanation %}
+                        <div class="explanation">
+                            <div class="explanation-title">💡 Tushuntirish:</div>
+                            {{ answer_detail.explanation }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div id="weak-categories" class="tab-content">
+            {% if weak_categories %}
+            <div class="weak-categories">
+                <h2 class="section-title">⚠️ Takrorlash kerak bo'lgan mavzular</h2>
+                
+                {% for weak_cat in weak_categories %}
+                <div class="category-item">
+                    <div class="category-header">
+                        <div class="category-name">{{ weak_cat.category.name_uz }}</div>
+                        <div class="category-stats">
+                            {{ weak_cat.wrong_count }}/{{ weak_cat.total_count }} xato ({{ weak_cat.percentage }}%)
+                        </div>
+                    </div>
+                    
+                    <p>Bu mavzu bo'yicha {{ weak_cat.wrong_count }} ta xato qildingiz. Quyidagi materiallarni o'rganishni tavsiya etamiz:</p>
+                    
+                    {% if weak_cat.education_materials %}
+                    <div class="education-materials">
+                        {% for material in weak_cat.education_materials %}
+                        <div class="material-item">
+                            <span class="material-icon">
+                                {% if material.content_type == 'video' %}📹
+                                {% elif material.content_type == 'text' %}📄
+                                {% else %}🖼️{% endif %}
+                            </span>
+                            <a href="/quiz/education/content/{{ material.id }}/" class="material-link">{{ material.title }}</a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div style="margin-top: 1rem;">
+                        <a href="/quiz/education/{{ weak_cat.category.id }}/" class="recommendation-action">Bu mavzuni batafsil o'rganish</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="answers-section">
+                <h2 class="section-title">🎉 Ajoyib!</h2>
+                <p>Barcha mavzularda yaxshi natija ko'rsatdingiz! Davom eting!</p>
+            </div>
+            {% endif %}
+        </div>
+
     </div>
+
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <script>
+        // Tab switching functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // AI Analysis functionality
+        document.getElementById('aiAnalysisBtn').addEventListener('click', function() {
+            const btn = this;
+            const loader = document.getElementById('aiLoader');
+            const insightsSection = document.getElementById('aiInsightsSection');
+            const contentDiv = document.getElementById('aiAnalysisContent');
+            
+            // Show loader
+            btn.disabled = true;
+            btn.innerHTML = '🤖 AI tahlil qilinmoqda... <div id="aiLoader" style="display: inline-block; margin-left: 10px;"><div style="width: 20px; height: 20px; border: 2px solid #ffffff40; border-top: 2px solid white; border-radius: 50%; animation: spin 1s linear infinite; display: inline-block;"></div></div>';
+            
+            // Make AJAX request to get AI analysis
+            fetch('/quiz/ai-analysis/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    'test_result_id': {{ test_result.id }}
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show AI insights
+                    contentDiv.innerHTML = data.ai_analysis.replace(/\n/g, '<br>');
+                    insightsSection.style.display = 'block';
+                    
+                    // Update button
+                    btn.innerHTML = '🤖 AI tahlil tayyor!';
+                    btn.style.background = 'linear-gradient(135deg, #28a745, #20c997)';
+                    
+                    // Scroll to AI section
+                    insightsSection.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    contentDiv.innerHTML = 'AI tahlilida xatolik yuz berdi. Iltimos keyinroq urinib ko\'ring.';
+                    insightsSection.style.display = 'block';
+                    btn.innerHTML = '🤖 Xatolik yuz berdi';
+                    btn.style.background = 'linear-gradient(135deg, #dc3545, #fd7e14)';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                contentDiv.innerHTML = 'Tarmoq xatoligi. Iltimos internet aloqangizni tekshiring.';
+                insightsSection.style.display = 'block';
+                btn.innerHTML = '🤖 Tarmoq xatoligi';
+                btn.style.background = 'linear-gradient(135deg, #dc3545, #fd7e14)';
+            })
+            .finally(() => {
+                btn.disabled = false;
+            });
+        });
+    </script>
+
+    <!-- CSRF Token for AJAX -->
+    {% csrf_token %}
 </body>
 </html>

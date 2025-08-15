@@ -47,11 +47,7 @@
                 </div>
                 
                 <!-- Navigation Buttons -->
-                <div style="display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1rem; border-top: 2px solid #e9ecef;">
-                    <button id="prev-btn" onclick="previousQuestion()" 
-                            style="background: #6c757d; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: bold;">
-                        ← Oldingi savol
-                    </button>
+                <div style="display: flex; justify-content: flex-end; margin-top: 2rem; padding-top: 1rem; border-top: 2px solid #e9ecef;">
                     <button id="next-btn" onclick="nextQuestion()" 
                             style="background: #667eea; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; cursor: pointer; font-weight: bold;">
                         Keyingi savol →
@@ -129,6 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
     startTimer();
     updateQuestionNavigation();
     updateNavigationButtons();
+    updateProgress(); // Tugmani dastlab disabled qilish uchun
 });
 
 function loadQuestion(index) {
@@ -265,6 +262,15 @@ function updateRealCorrectCount() {
 }
 
 function nextQuestion() {
+    // Check if current question is answered
+    const currentQuestion = questions[currentQuestionIndex];
+    const selectedAnswer = document.querySelector(`input[name="question_${currentQuestion.id}"]:checked`);
+    
+    if (!selectedAnswer) {
+        alert('❌ Oldin bu savolga javob bering!\n\nKeyingi savolga o\'tishdan oldin joriy savolga javob berish shart.');
+        return;
+    }
+    
     // Show result for current question before moving
     showQuestionResult(currentQuestionIndex);
     
@@ -281,31 +287,9 @@ function nextQuestion() {
     }
 }
 
-function previousQuestion() {
-    // Show result for current question before moving
-    showQuestionResult(currentQuestionIndex);
-    
-    if (currentQuestionIndex > 0) {
-        loadQuestion(currentQuestionIndex - 1);
-        updateQuestionNavigation();
-        updateNavigationButtons();
-    }
-}
 
 function updateNavigationButtons() {
-    const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
-    
-    // Update previous button
-    if (currentQuestionIndex === 0) {
-        prevBtn.style.opacity = '0.5';
-        prevBtn.style.cursor = 'not-allowed';
-        prevBtn.disabled = true;
-    } else {
-        prevBtn.style.opacity = '1';
-        prevBtn.style.cursor = 'pointer';
-        prevBtn.disabled = false;
-    }
     
     // Update next button
     if (currentQuestionIndex === questions.length - 1) {
@@ -350,14 +334,8 @@ function updateQuestionNavigation() {
                 btn.style.cursor = 'default';
                 btn.innerHTML = `${index + 1}`;
             } else if (isAnswered) {
-                // Answered questions - allow clicking to review
-                btn.onclick = () => {
-                    // Show result for current question before moving
-                    showQuestionResult(currentQuestionIndex);
-                    loadQuestion(index);
-                    updateQuestionNavigation();
-                    updateNavigationButtons();
-                };
+                // Answered questions - no clicking allowed, just show status
+                btn.onclick = null;
                 
                 // Check if result has been shown for this question
                 if (btn.innerHTML.includes('✅')) {
@@ -378,7 +356,7 @@ function updateQuestionNavigation() {
                 }
                 btn.style.color = 'white';
                 btn.style.transform = 'scale(1)';
-                btn.style.cursor = 'pointer';
+                btn.style.cursor = 'not-allowed';
             } else if (index < currentQuestionIndex) {
                 // Previous unanswered questions - locked
                 btn.onclick = null;
@@ -421,6 +399,24 @@ function updateProgress() {
     
     // Update answered count text
     document.getElementById('answered-count').textContent = answeredCount;
+    
+    // Testni yakunlash tugmasini boshqarish
+    const finishBtn = document.querySelector('button[onclick="finishTest()"]');
+    if (finishBtn) {
+        if (answeredCount < totalQuestions) {
+            finishBtn.disabled = true;
+            finishBtn.style.background = '#6c757d';
+            finishBtn.style.cursor = 'not-allowed';
+            finishBtn.innerHTML = `🔒 Testni yakunlash (${answeredCount}/${totalQuestions})`;
+            finishBtn.title = 'Barcha savollarga javob bering';
+        } else {
+            finishBtn.disabled = false;
+            finishBtn.style.background = '#28a745';
+            finishBtn.style.cursor = 'pointer';
+            finishBtn.innerHTML = '✓ Testni yakunlash';
+            finishBtn.title = 'Testni yakunlash';
+        }
+    }
 }
 
 function startTimer() {
@@ -442,10 +438,12 @@ function finishTest() {
     clearInterval(timerInterval);
     
     const answeredCount = Object.keys(userAnswers).length;
-    if (answeredCount < questions.length) {
-        if (!confirm(`Siz ${answeredCount}/${questions.length} ta savolga javob berdingiz. Testni yakunlashni xohlaysizmi?`)) {
-            return;
-        }
+    const totalQuestions = questions.length;
+    
+    // 20 ta savolga javob berilmagan bo'lsa, testni yakunlab bo'lmaydi
+    if (answeredCount < totalQuestions) {
+        alert(`❌ Testni yakunlash uchun barcha ${totalQuestions} ta savolga javob berish shart!\n\nHozircha ${answeredCount} ta savolga javob berdingiz.\nQolgan ${totalQuestions - answeredCount} ta savolga ham javob bering.`);
+        return;
     }
     
     // Show loading

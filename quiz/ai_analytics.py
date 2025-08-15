@@ -5,8 +5,8 @@ from .models import UserAnswer, TestResult, Question, Category
 
 class AIAnalytics:
     def __init__(self):
-        # API key
-        self.api_key = "AIzaSyCcYddJ2JgiEjMmY0gFLTguiAiETMy9dHY"
+        # API key from settings
+        self.api_key = settings.GEMINI_API_KEY
         genai.configure(api_key=self.api_key)
         self.model = genai.GenerativeModel('gemini-pro')
     

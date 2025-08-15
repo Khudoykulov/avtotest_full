@@ -23,6 +23,7 @@ urlpatterns = [
     path('submit-test/', views.submit_test_view, name='submit_test'),
     path('get-test-recommendations/', views.get_test_recommendations_view, name='get_test_recommendations'),
     path('results/<int:result_id>/', views.test_results_view, name='test_results'),
+    path('ai-analysis/', views.ai_analysis_view, name='ai_analysis'),
     
     # Statistika va tahlil
     path('statistics/', views.statistics_view, name='statistics'),

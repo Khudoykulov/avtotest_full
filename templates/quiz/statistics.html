@@ -12,6 +12,7 @@
         <p style="color: rgba(255,255,255,0.9); font-size: 1.1rem;">
             Test natijalari va taraqqiyot tahlili
         </p>
+        
     </div>
 
     <!-- Overview Cards -->
@@ -25,13 +26,12 @@
         <div class="card text-center">
             <div style="font-size: 2.5rem; color: #28a745; margin-bottom: 0.5rem;">✅</div>
             <h3 style="color: #333; margin-bottom: 0.5rem;">O'tgan testlar</h3>
-            <div style="font-size: 2rem; font-weight: bold; color: #28a745;">{{ stats.passed_tests }}</div>
+            <div style="font-size: 2rem; font-weight: bold; color: #28a745;">{{ stats.passed_tests|default:"0" }}</div>
             <small style="color: #6c757d;">
                 {% if stats.total_tests > 0 %}
-                    ({{ stats.passed_tests|floatformat:0 }}/{{ stats.total_tests }} - 
-                    {% widthratio stats.passed_tests stats.total_tests 100 %}%)
+                    ({{ stats.passed_tests|default:"0" }}/{{ stats.total_tests }} - {{ stats.pass_rate|default:"0" }}%)
                 {% else %}
-                    (0%)
+                    (0/0 - 0%)
                 {% endif %}
             </small>
         </div>
@@ -57,16 +57,6 @@
         </div>
     </div>
 
-    <!-- Performance Chart -->
-    <div class="card" style="margin-bottom: 2rem;">
-        <h3 style="color: #667eea; margin-bottom: 1.5rem;">📈 Taraqqiyot grafigi</h3>
-        <div style="position: relative; height: 300px; background: #f8f9fa; border-radius: 8px; padding: 1rem;">
-            <canvas id="performanceChart" style="width: 100%; height: 100%;"></canvas>
-        </div>
-        <p style="color: #6c757d; text-align: center; margin-top: 1rem; font-size: 0.9rem;">
-            So'nggi 10 ta test natijalaringiz
-        </p>
-    </div>
 
     <!-- Category Performance -->
     {% if category_stats %}
@@ -126,6 +116,7 @@
                         <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600;">Holat</th>
                         <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600;">Vaqt</th>
                         <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600;">Sana</th>
+                        <th style="padding: 1rem; text-align: center; border-bottom: 2px solid #dee2e6; font-weight: 600;">Batafsil</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -158,6 +149,14 @@
                         </td>
                         <td style="padding: 1rem; text-align: center; color: #6c757d;">
                             {{ result.created_at|date:"d.m.Y H:i" }}
+                        </td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <a href="{% url 'quiz:test_results' result.id %}" 
+                               style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-size: 0.85rem; transition: transform 0.2s;"
+                               onmouseover="this.style.transform='translateY(-1px)'" 
+                               onmouseout="this.style.transform='translateY(0)'">
+                                🔍 Ko'rish
+                            </a>
                         </td>
                     </tr>
                     {% endfor %}

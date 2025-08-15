@@ -132,8 +132,10 @@ def submit_test_view(request):
 
         # Update test result
         test_result.score = correct_answers
-        test_result.passed = correct_answers >= (total_questions * 0.7)  # 70% to pass
+        pass_threshold = total_questions * 0.7  # 70% to pass
+        test_result.passed = correct_answers >= pass_threshold
         test_result.save()
+        
 
         # Update user stats
         user = request.user
@@ -163,6 +165,7 @@ def statistics_view(request):
     passed_tests = user_results.filter(passed=True).count()
     average_score = user_results.aggregate(Avg('score'))['score__avg'] or 0
     best_score = request.user.best_score
+    
 
     # Recent results (last 10)
     recent_results = user_results[:10]
@@ -916,45 +919,146 @@ def calculate_consecutive_days(results):
 
 @login_required
 def test_results_view(request, result_id):
-    """Display detailed test results"""
+    """Display detailed test results with comprehensive analysis"""
     test_result = get_object_or_404(TestResult, id=result_id, user=request.user)
-    user_answers = UserAnswer.objects.filter(test_result=test_result).select_related('question', 'selected_answer')
+    user_answers = UserAnswer.objects.filter(test_result=test_result).select_related(
+        'question', 'question__category', 'selected_answer'
+    ).prefetch_related('question__answers')
 
     # Group answers by correctness for analysis
     correct_answers = user_answers.filter(is_correct=True)
     incorrect_answers = user_answers.filter(is_correct=False)
 
+    # Prepare detailed answer analysis
+    detailed_answers = []
+    for user_answer in user_answers:
+        question = user_answer.question
+        correct_answer = question.answers.filter(is_correct=True).first()
+        
+        detailed_answers.append({
+            'question': question,
+            'user_answer': user_answer.selected_answer,
+            'correct_answer': correct_answer,
+            'is_correct': user_answer.is_correct,
+            'explanation': question.explanation,
+            'category': question.category
+        })
+
     # Calculate category performance for this test
     category_performance = {}
-    if test_result.category:
-        category_performance[test_result.category.name_uz] = {
-            'correct': correct_answers.count(),
-            'total': user_answers.count(),
-            'percentage': round((correct_answers.count() / user_answers.count() * 100), 1)
+    category_stats = {}
+    
+    # Analyze each category in this test
+    for answer_detail in detailed_answers:
+        category = answer_detail['category']
+        if category not in category_stats:
+            category_stats[category] = {
+                'correct': 0,
+                'total': 0,
+                'questions': []
+            }
+        
+        category_stats[category]['total'] += 1
+        category_stats[category]['questions'].append(answer_detail)
+        
+        if answer_detail['is_correct']:
+            category_stats[category]['correct'] += 1
+
+    # Convert to percentage and find weak categories
+    weak_categories = []
+    for category, stats in category_stats.items():
+        percentage = round((stats['correct'] / stats['total'] * 100), 1)
+        category_performance[category.name_uz] = {
+            'correct': stats['correct'],
+            'total': stats['total'],
+            'percentage': percentage
         }
-
-    # Get recommendations based on incorrect answers
-    weak_topics = []
-    if incorrect_answers.exists():
-        # Find most common mistake categories
-        mistake_categories = incorrect_answers.values('question__category__name_uz').annotate(
-            mistake_count=Count('id')
-        ).order_by('-mistake_count')[:3]
-
-        for cat in mistake_categories:
-            weak_topics.append({
-                'category': cat['question__category__name_uz'],
-                'mistakes': cat['mistake_count']
+        
+        if percentage < 70:  # Less than 70% is considered weak
+            # Get education materials for this category
+            education_materials = EducationContent.objects.filter(
+                category=category
+            ).order_by('order')[:3]
+            
+            weak_categories.append({
+                'category': category,
+                'percentage': percentage,
+                'wrong_count': stats['total'] - stats['correct'],
+                'total_count': stats['total'],
+                'education_materials': education_materials,
+                'wrong_questions': [q for q in stats['questions'] if not q['is_correct']]
             })
+
+    # Get AI insights for this specific test
+    ai_insights = None
+    try:
+        from .ai_analytics import get_ai_insights_for_user
+        ai_insights = get_ai_insights_for_user(request.user)
+    except Exception as e:
+        pass
+
+    # Generate specific recommendations for this test
+    test_recommendations = []
+    
+    # Performance-based recommendations
+    percentage = round((correct_answers.count() / user_answers.count() * 100), 1)
+    
+    if percentage >= 90:
+        test_recommendations.append({
+            'title': 'Mukammal natija! 🏆',
+            'description': 'Siz bu mavzuni a\'lo darajada bilasiz.',
+            'priority': 'success',
+            'action': 'Boshqa kategoriyalarni ham sinab ko\'ring',
+            'url': '/quiz/categories/'
+        })
+    elif percentage >= 80:
+        test_recommendations.append({
+            'title': 'Yaxshi natija! 👍',
+            'description': f'Siz {incorrect_answers.count()} ta xato qildingiz.',
+            'priority': 'info',
+            'action': 'Xato savollarni ko\'rib chiqing',
+            'url': '#wrong-answers'
+        })
+    elif percentage >= 70:
+        test_recommendations.append({
+            'title': 'O\'tish balli! ✅',
+            'description': 'Test o\'tdingiz, lekin yaxshilash mumkin.',
+            'priority': 'warning',
+            'action': 'Ta\'lim materiallarini o\'qing',
+            'url': '/quiz/education/'
+        })
+    else:
+        test_recommendations.append({
+            'title': 'Ko\'proq o\'rganish kerak 📚',
+            'description': 'Asosiy mavzularni takrorlash tavsiya etiladi.',
+            'priority': 'danger',
+            'action': 'Nazariy materiallarni o\'rganing',
+            'url': '/quiz/education/'
+        })
+
+    # Add category-specific recommendations
+    for weak_cat in weak_categories:
+        test_recommendations.append({
+            'title': f'{weak_cat["category"].name_uz} mavzusini takrorlang',
+            'description': f'{weak_cat["wrong_count"]} ta xato aniqlandi',
+            'priority': 'warning',
+            'action': 'Maxsus ta\'lim materiallarini ko\'ring',
+            'url': f'/quiz/education/{weak_cat["category"].id}/',
+            'materials': weak_cat['education_materials']
+        })
 
     context = {
         'test_result': test_result,
         'user_answers': user_answers,
+        'detailed_answers': detailed_answers,
         'correct_answers': correct_answers,
         'incorrect_answers': incorrect_answers,
         'category_performance': category_performance,
-        'weak_topics': weak_topics,
-        'pass_percentage': 70,  # Required percentage to pass
+        'weak_categories': weak_categories,
+        'ai_insights': ai_insights,
+        'test_recommendations': test_recommendations,
+        'percentage': percentage,
+        'pass_percentage': 70,
     }
 
     return render(request, 'quiz/results.html', context)
@@ -1522,3 +1626,157 @@ def get_test_recommendations_view(request):
             })
     
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+
+@login_required
+def ai_analysis_view(request):
+    """AI tahlil qilish uchun AJAX view"""
+    if request.method == 'POST':
+        try:
+            import json
+            data = json.loads(request.body)
+            test_result_id = data.get('test_result_id')
+            
+            if not test_result_id:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Test result ID ko\'rsatilmagan'
+                })
+            
+            # Test natijasini olish
+            test_result = get_object_or_404(TestResult, id=test_result_id, user=request.user)
+            
+            # AI tahlilini olish
+            from .ai_analytics import get_ai_insights_for_user
+            ai_insights = get_ai_insights_for_user(request.user)
+            
+            # Test-specific AI analysis
+            user_answers = UserAnswer.objects.filter(test_result=test_result).select_related(
+                'question', 'question__category', 'selected_answer'
+            )
+            
+            wrong_answers = user_answers.filter(is_correct=False)
+            
+            # Bu test uchun maxsus AI prompt yaratish
+            test_specific_prompt = f"""
+Bu foydalanuvchi hozirgina test topshirdi. Quyidagi ma'lumotlar asosida maxsus tahlil bering:
+
+TEST NATIJASI:
+- Umumiy ball: {test_result.score}/{test_result.total_questions}
+- Foiz: {round(test_result.score/test_result.total_questions*100, 1)}%
+- Test turi: {'Kategoriya' if test_result.category else 'Umumiy'}
+- Kategoriya: {test_result.category.name_uz if test_result.category else 'Barcha mavzular'}
+
+XATO QILINGAN SAVOLLAR:
+"""
+            
+            # Xato qilingan savollarni qo'shish
+            for i, wrong_answer in enumerate(wrong_answers[:5], 1):  # Faqat birinchi 5 ta
+                correct_answer = wrong_answer.question.answers.filter(is_correct=True).first()
+                test_specific_prompt += f"""
+{i}. SAVOL: {wrong_answer.question.question_text}
+   KATEGORIA: {wrong_answer.question.category.name_uz}
+   SIZNING JAVOBINGIZ: {wrong_answer.selected_answer.answer_text}
+   TO'G'RI JAVOB: {correct_answer.answer_text if correct_answer else 'Noma\'lum'}
+"""
+
+            test_specific_prompt += """
+
+VAZIFA:
+1. Bu test natijasini qisqacha baholang
+2. Xato qilingan har bir savol uchun qisqa tushuntirish bering
+3. Keyingi testlarga qanday tayyorlanish kerakligini aytib bering
+4. 3-4 ta aniq maslahat bering
+
+Javobingizni o'zbek tilida, tushunarli va motivatsiyali qilib yozing.
+"""
+            
+            # AI dan javob olish
+            try:
+                import google.generativeai as genai
+                from django.conf import settings
+                genai.configure(api_key=settings.GEMINI_API_KEY)
+                model = genai.GenerativeModel('gemini-pro')
+                
+                response = model.generate_content(test_specific_prompt)
+                ai_analysis = response.text
+                
+                # AI tahlilini bazaga saqlash
+                from .models import AIAnalysis
+                
+                # Zaif va kuchli kategoriyalarni aniqlash
+                weak_categories = []
+                strong_categories = []
+                category_stats = {}
+                
+                # Kategoriya bo'yicha statistika
+                for answer in user_answers:
+                    category = answer.question.category
+                    if category not in category_stats:
+                        category_stats[category] = {'correct': 0, 'total': 0}
+                    
+                    category_stats[category]['total'] += 1
+                    if answer.is_correct:
+                        category_stats[category]['correct'] += 1
+                
+                # Zaif va kuchli kategoriyalarni ajratish
+                for category, stats in category_stats.items():
+                    percentage = (stats['correct'] / stats['total']) * 100
+                    if percentage < 70:
+                        weak_categories.append({
+                            'name': category.name_uz,
+                            'percentage': round(percentage, 1),
+                            'correct': stats['correct'],
+                            'total': stats['total']
+                        })
+                    elif percentage >= 85:
+                        strong_categories.append({
+                            'name': category.name_uz,
+                            'percentage': round(percentage, 1),
+                            'correct': stats['correct'],
+                            'total': stats['total']
+                        })
+                
+                # Tavsiyalar yaratish
+                recommendations = []
+                if weak_categories:
+                    for weak_cat in weak_categories[:3]:
+                        recommendations.append({
+                            'type': 'study_category',
+                            'title': f"{weak_cat['name']} mavzusini takrorlang",
+                            'description': f"Bu mavzuda {weak_cat['percentage']}% natija ko'rsatdingiz",
+                            'priority': 'high'
+                        })
+                
+                # AI tahlilini saqlash
+                ai_analysis_obj = AIAnalysis.objects.create(
+                    user=request.user,
+                    test_result=test_result,
+                    analysis_text=ai_analysis,
+                    recommendations=recommendations,
+                    confidence_score=85,  # Default confidence
+                    analysis_type='test_specific',
+                    weak_categories=weak_categories,
+                    strong_categories=strong_categories,
+                    improvement_suggestions=recommendations
+                )
+                
+                return JsonResponse({
+                    'success': True,
+                    'ai_analysis': ai_analysis,
+                    'analysis_id': ai_analysis_obj.id
+                })
+                
+            except Exception as ai_error:
+                return JsonResponse({
+                    'success': False,
+                    'error': f'AI xizmatida xatolik: {str(ai_error)}'
+                })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': f'Xatolik yuz berdi: {str(e)}'
+            })
+    
+    return JsonResponse({'success': False, 'error': 'Faqat POST so\'rov qabul qilinadi'})

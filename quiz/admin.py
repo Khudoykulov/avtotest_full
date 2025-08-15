@@ -47,7 +47,7 @@ class AnswerInline(admin.TabularInline):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('get_short_question', 'category', 'answers_count', 'has_image', 'created_at')
+    list_display = ('id', 'get_short_question', 'category', 'answers_count', 'has_image', 'created_at')
     list_filter = ('category', 'created_at')
     search_fields = ('question_text',)
     inlines = [AnswerInline]

@@ -142,3 +142,6 @@ AUTH_USER_MODEL = 'account.CustomUser'
 LOGIN_URL = '/account/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# AI Settings
+GEMINI_API_KEY = 'AIzaSyCcYddJ2JgiEjMmY0gFLTguiAiETMy9dHY'

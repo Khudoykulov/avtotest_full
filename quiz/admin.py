@@ -1,5 +1,10 @@
 from django.contrib import admin
+from django.urls import path
+from django.http import HttpResponseRedirect
+from django.contrib import messages
+from django.utils.html import format_html
 from .models import Category, Question, Answer, TestTicket, TestResult, UserAnswer, EducationContent
+import random
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):

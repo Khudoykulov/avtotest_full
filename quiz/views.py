@@ -89,10 +89,24 @@ def submit_test_view(request):
         total_questions = len(answers)
 
         # Create test result
+        ticket_obj = None
+        category_obj = None
+        
+        if test_type == 'ticket' and ticket_id:
+            try:
+                ticket_obj = TestTicket.objects.get(ticket_number=ticket_id)
+            except TestTicket.DoesNotExist:
+                pass
+        elif test_type == 'category' and category_id:
+            try:
+                category_obj = Category.objects.get(id=category_id)
+            except Category.DoesNotExist:
+                pass
+        
         test_result = TestResult.objects.create(
             user=request.user,
-            ticket_id=ticket_id if test_type == 'ticket' else None,
-            category_id=category_id if test_type == 'category' else None,
+            ticket=ticket_obj,
+            category=category_obj,
             score=0,  # Will update after calculating
             total_questions=total_questions,
             time_taken=timedelta(seconds=time_taken),

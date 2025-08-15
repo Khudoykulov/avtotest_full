@@ -21,23 +21,25 @@
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem;">
-        {% for i in "12345" %}
+        {% for ticket in tickets %}
         <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; text-align: center; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: bold;">{{ i }}</div>
-            <h3 style="color: #333; margin-bottom: 0.5rem;">Bilet {{ i }}</h3>
-            <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">20 ta savol</p>
-            <p style="color: #dc3545; font-size: 0.8rem; margin-bottom: 1rem;">Tasodifiy tanlov</p>
-            <a href="{% url 'quiz:take_ticket_test' i %}" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Testni boshlash</a>
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: bold; font-size: 1.1rem;">{{ ticket.ticket_number }}</div>
+            <h3 style="color: #333; margin-bottom: 0.5rem;">{{ ticket.name }}</h3>
+            <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 0.5rem;">{{ ticket.questions.count }} ta savol</p>
+            <p style="color: #dc3545; font-size: 0.8rem; margin-bottom: 1rem;">
+                {% if ticket.questions.count >= 20 %}
+                    ✅ To'liq bilet
+                {% else %}
+                    ⚠️ {{ ticket.questions.count }} ta savol
+                {% endif %}
+            </p>
+            <a href="{% url 'quiz:take_ticket_test' ticket.ticket_number %}" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Testni boshlash</a>
         </div>
-        {% endfor %}
-
-        {% for i in "678910" %}
-        <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; text-align: center; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: bold;">{{ i }}</div>
-            <h3 style="color: #333; margin-bottom: 0.5rem;">Bilet {{ i }}</h3>
-            <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">20 ta savol</p>
-            <p style="color: #dc3545; font-size: 0.8rem; margin-bottom: 1rem;">Tasodifiy tanlov</p>
-            <a href="{% url 'quiz:take_ticket_test' i %}" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Testni boshlash</a>
+        {% empty %}
+        <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #6c757d;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
+            <h3>Hozircha biletlar mavjud emas</h3>
+            <p>Tez orada test biletlari qo'shiladi</p>
         </div>
         {% endfor %}
     </div>

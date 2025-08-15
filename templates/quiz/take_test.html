@@ -10,7 +10,16 @@
             <button onclick="window.history.back()" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
                 ← Testni tugatish
             </button>
-            <h1 style="color: #667eea; margin: 0;">{{ test_name }}</h1>
+            <div style="text-align: center;">
+                <h1 style="color: #667eea; margin: 0;">{{ test_name }}</h1>
+                {% if test_type == 'ticket' %}
+                    <p style="color: #6c757d; margin: 0.5rem 0 0 0; font-size: 0.9rem;">📋 Biletlik test - 20 ta savol</p>
+                {% elif test_type == 'category' %}
+                    <p style="color: #6c757d; margin: 0.5rem 0 0 0; font-size: 0.9rem;">📚 Kategoriya testi - 20 ta savol</p>
+                {% elif test_type == 'general' %}
+                    <p style="color: #6c757d; margin: 0.5rem 0 0 0; font-size: 0.9rem;">🎯 Umumiy test - 20 ta savol</p>
+                {% endif %}
+            </div>
             <div></div>
         </div>
 

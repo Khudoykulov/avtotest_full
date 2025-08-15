@@ -20,6 +20,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from quiz.views import home_view
+from test_view import test_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,6 +28,7 @@ urlpatterns = [
     path('account/', include('account.urls')),
     path('quiz/', include('quiz.urls')),
     path('education/', include('education.urls')),
+    path('test/', test_view, name='test'),
 ]
 
 if settings.DEBUG:

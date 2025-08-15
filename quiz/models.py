@@ -8,7 +8,7 @@ class Category(models.Model):
     name = models.CharField(max_length=100)
     name_uz = models.CharField(max_length=100)
     description = models.TextField(blank=True)
-    icon = models.CharField(max_length=50, blank=True)  # For emoji or icon class
+    icon = models.ImageField(upload_to='categories/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:

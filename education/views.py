@@ -24,7 +24,7 @@ def education_content_view(request, content_id):
         category=content.category
     ).exclude(id=content_id)[:3]
     
-    return render(request, 'education/content.html', {
+    return render(request, 'education/content_clean.html', {
         'content': content,
         'related_content': related_content
     })

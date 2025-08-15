@@ -12,7 +12,28 @@
     {% for category in categories %}
     <div class="col-md-6">
         <div class="card">
-            <h3>{{ category.icon }} {{ category.name_uz }}</h3>
+            <!-- DEBUG: Icon ma'lumotlari -->
+            <div style="background: #fff3cd; padding: 0.5rem; margin-bottom: 1rem; font-size: 0.8rem; border-radius: 4px;">
+                <strong>Debug:</strong> Icon: {{ category.icon }} | 
+                Icon mavjudmi: {% if category.icon %}✅{% else %}❌{% endif %} |
+                Icon URL: {% if category.icon %}{{ category.icon.url }}{% else %}N/A{% endif %}
+            </div>
+
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                {% if category.icon %}
+                    <div style="position: relative; margin-right: 1rem;">
+                        <img src="{{ category.icon.url }}" 
+                             alt="{{ category.name_uz }}" 
+                             style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%; border: 2px solid #28a745; background: #f8f9fa;"
+                             onload="console.log('✅ Icon yuklandi:', '{{ category.name_uz }}', this.src); this.style.borderColor='#28a745'; this.nextElementSibling.innerHTML='✅';"
+                             onerror="console.log('❌ Icon yuklanmadi:', '{{ category.name_uz }}', this.src); this.style.display='none'; this.nextElementSibling.style.display='inline-block'; this.nextElementSibling.innerHTML='❌ ' + this.src;">
+                        <span style="display: none; font-size: 1.5rem; color: red;">⚠️</span>
+                    </div>
+                {% else %}
+                    <span style="font-size: 2rem; margin-right: 1rem;">📚</span>
+                {% endif %}
+                <h3 style="margin: 0;">{{ category.name_uz }}</h3>
+            </div>
             <p>{{ category.description|truncatewords:20 }}</p>
             
             {% if category.education_materials.exists %}

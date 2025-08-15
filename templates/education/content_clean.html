@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ content.title }} - Ta'lim - Avtotest{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="mb-3">
+        <a href="{% url 'education:category' content.category.id %}" class="btn btn-secondary">
+            ⬅ {{ content.category.name_uz }}ga qaytish
+        </a>
+    </div>
+    
+    <h1>{{ content.title }}</h1>
+    
+    <!-- DEBUG INFO -->
+    <div style="background: #fff3cd; padding: 1rem; border-radius: 8px; margin: 1rem 0; border: 1px solid #ffeaa7;">
+        <h4>🔍 Debug Ma'lumotlari:</h4>
+        <p><strong>Content Type:</strong> {{ content.content_type }}</p>
+        <p><strong>Video URL:</strong> {{ content.video_url }}</p>
+        <p><strong>Video URL mavjudmi:</strong> {% if content.video_url %}Ha{% else %}Yo'q{% endif %}</p>
+    </div>
+    
+    {% if content.content_type == 'video' and content.video_url %}
+        {% load video_filters %}
+        
+        <!-- VIDEO SECTION -->
+        <div style="background: #f8f9fa; padding: 2rem; border-radius: 12px; margin: 2rem 0;">
+            <h3>🎥 Video Dars</h3>
+            
+            {% if content.video_url|is_youtube %}
+                <div style="background: white; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
+                    <h4>YouTube Video</h4>
+                    <p><strong>Video ID:</strong> {{ content.video_url|youtube_video_id }}</p>
+                    
+                    <!-- YouTube iframe -->
+                    <div style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%; margin: 1rem 0; background: #000; border-radius: 8px; overflow: hidden;">
+                        <iframe 
+                            src="{{ content.video_url|youtube_embed_url }}"
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen
+                            title="{{ content.title }}"
+                            onload="console.log('Video yuklandi')"
+                            onerror="console.log('Video yuklanmadi'); this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        </iframe>
+                        
+                        <!-- Fallback agar iframe ishlamasa -->
+                        <div style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(45deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; text-align: center;">
+                            <div>
+                                <div style="font-size: 4rem; margin-bottom: 1rem;">🚫</div>
+                                <h3>Video yuklanmadi</h3>
+                                <p>YouTube videoni iframe'da ko'rsatib bo'lmaydi</p>
+                                <a href="{{ content.video_url }}" target="_blank" style="color: white; text-decoration: underline;">
+                                    YouTube'da ochish
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Video ma'lumotlari -->
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 1rem; border-left: 4px solid #667eea;">
+                        <h5 style="margin: 0 0 0.5rem 0; color: #667eea;">📱 Video Ma'lumotlari</h5>
+                        <p style="margin: 0.25rem 0; font-size: 0.9rem;"><strong>Original URL:</strong></p>
+                        <p style="margin: 0.25rem 0; font-size: 0.85rem; word-break: break-all; color: #6c757d;">{{ content.video_url }}</p>
+                        
+                        <p style="margin: 0.25rem 0; font-size: 0.9rem;"><strong>Embed URL:</strong></p>
+                        <p style="margin: 0.25rem 0; font-size: 0.85rem; word-break: break-all; color: #6c757d;">{{ content.video_url|youtube_embed_url }}</p>
+                        
+                        <p style="margin: 0.25rem 0; font-size: 0.9rem;"><strong>Video ID:</strong> <code style="background: #e9ecef; padding: 2px 6px; border-radius: 4px;">{{ content.video_url|youtube_video_id }}</code></p>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <a href="{{ content.video_url }}" target="_blank" class="btn btn-primary">
+                            📺 YouTube da ochish
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <video controls style="width: 100%; max-height: 400px; border-radius: 8px;">
+                    <source src="{{ content.video_url }}" type="video/mp4">
+                    Video yuklanmadi
+                </video>
+            {% endif %}
+        </div>
+    {% endif %}
+    
+    {% if content.content_type == 'image' and content.image %}
+        <div class="text-center mb-3">
+            <img src="{{ content.image.url }}" 
+                 alt="{{ content.title }}" 
+                 style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.1);">
+        </div>
+    {% endif %}
+    
+    {% if content.text_content %}
+        <div style="font-size: 1.1rem; line-height: 1.7; color: #333; margin: 2rem 0;">
+            {{ content.text_content|linebreaks }}
+        </div>
+    {% endif %}
+    
+    <div class="mt-4">
+        <a href="{% url 'quiz:take_category_test' content.category.id %}" class="btn btn-primary">
+            Test topshirish
+        </a>
+    </div>
+</div>
+{% endblock %}

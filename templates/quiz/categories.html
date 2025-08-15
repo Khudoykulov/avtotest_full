@@ -42,7 +42,14 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
             {% for category in categories %}
             <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; text-align: center; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
-                <div style="font-size: 2.5rem; margin-bottom: 1rem;">{{ category.icon|default:"📋" }}</div>
+                <div style="margin-bottom: 1rem;">
+                    {% if category.icon %}
+                        <img src="{{ category.icon.url }}" alt="{{ category.name_uz }}" 
+                             style="width: 60px; height: 60px; object-fit: cover; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    {% else %}
+                        <div style="font-size: 2.5rem;">📋</div>
+                    {% endif %}
+                </div>
                 <h3 style="color: #333; margin-bottom: 0.5rem;">{{ category.name_uz }}</h3>
                 <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">{{ category.question_count }} ta savol mavjud</p>
                 <a href="{% url 'quiz:category_test' category.id %}" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Kategoriyaga kirish</a>

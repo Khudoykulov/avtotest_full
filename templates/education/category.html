@@ -4,7 +4,28 @@
 
 {% block content %}
 <div class="card">
-    <h1>{{ category.icon }} {{ category.name_uz }}</h1>
+    <!-- DEBUG: Icon ma'lumotlari -->
+    <div style="background: #fff3cd; padding: 0.5rem; margin-bottom: 1rem; font-size: 0.8rem; border-radius: 4px;">
+        <strong>Debug:</strong> Icon: {{ category.icon }} | 
+        Icon mavjudmi: {% if category.icon %}✅{% else %}❌{% endif %} |
+        Icon URL: {% if category.icon %}{{ category.icon.url }}{% else %}N/A{% endif %}
+    </div>
+
+    <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+        {% if category.icon %}
+            <div style="position: relative; margin-right: 1rem;">
+                <img src="{{ category.icon.url }}" 
+                     alt="{{ category.name_uz }}" 
+                     style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 2px solid #ccc;"
+                     onload="console.log('Icon yuklandi: {{ category.name_uz }}'); this.nextElementSibling.style.display='none';"
+                     onerror="console.log('Icon yuklanmadi: {{ category.name_uz }}'); this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                <span style="display: none; font-size: 2.5rem;">❌</span>
+            </div>
+        {% else %}
+            <span style="font-size: 2.5rem; margin-right: 1rem;">📚</span>
+        {% endif %}
+        <h1 style="margin: 0;">{{ category.name_uz }}</h1>
+    </div>
     <p>{{ category.description }}</p>
     
     <div class="mt-3">
@@ -17,29 +38,43 @@
     {% for content in contents %}
     <div class="col-md-6">
         <div class="card">
-            {% if content.content_type == 'video' %}
-                <div class="mb-2">
+            <div class="mb-2" style="display: flex; justify-content: space-between; align-items: center;">
+                {% if content.content_type == 'video' %}
                     <span class="badge badge-primary">🎥 Video</span>
-                </div>
-            {% elif content.content_type == 'text' %}
-                <div class="mb-2">
+                {% elif content.content_type == 'text' %}
                     <span class="badge badge-success">📄 Matn</span>
-                </div>
-            {% elif content.content_type == 'image' %}
-                <div class="mb-2">
+                {% elif content.content_type == 'image' %}
                     <span class="badge badge-info">🖼️ Rasm</span>
-                </div>
-            {% endif %}
+                {% endif %}
+                <small style="color: #6c757d;">{{ content.order }}-dars</small>
+            </div>
             
             <h3>{{ content.title }}</h3>
             
             {% if content.content_type == 'text' and content.text_content %}
                 <p>{{ content.text_content|truncatewords:30 }}</p>
             {% elif content.content_type == 'video' and content.video_url %}
-                <p>Video material mavjud</p>
+                {% load video_filters %}
+                {% if content.video_url|is_youtube %}
+                    <!-- YouTube thumbnail -->
+                    <div style="position: relative; margin-bottom: 1rem;">
+                        <div style="background: linear-gradient(45deg, #667eea, #764ba2); padding: 2rem; border-radius: 12px; text-align: center; color: white;">
+                            <div style="font-size: 3rem; margin-bottom: 0.5rem;">📺</div>
+                            <p style="margin: 0; font-weight: 600;">YouTube Video Dars</p>
+                            <small style="opacity: 0.8;">Bosib tomosha qiling</small>
+                        </div>
+                    </div>
+                {% else %}
+                    <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; text-align: center; margin-bottom: 1rem;">
+                        <div style="font-size: 3rem; color: #667eea; margin-bottom: 0.5rem;">▶️</div>
+                        <p style="margin: 0; color: #6c757d;">Video dars mavjud</p>
+                    </div>
+                {% endif %}
             {% elif content.content_type == 'image' and content.image %}
-                {% load static %}
-                <img src="{{ content.image.url }}" alt="{{ content.title }}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px;">
+                <div style="margin-bottom: 1rem;">
+                    <img src="{{ content.image.url }}" alt="{{ content.title }}" 
+                         style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                </div>
             {% endif %}
             
             <div class="mt-3">

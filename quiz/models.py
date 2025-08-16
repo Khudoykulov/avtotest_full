@@ -52,6 +52,15 @@ class TestResult(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='test_results')
     ticket = models.ForeignKey(TestTicket, on_delete=models.CASCADE, blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True)
+    
+    # Umumiy test uchun qo'shimcha maydonlar
+    variant_id = models.IntegerField(blank=True, null=True)  # Qaysi variant ishlatilgan
+    test_type = models.CharField(max_length=20, choices=[
+        ('ticket', 'Bilet'),
+        ('category', 'Kategoriya'), 
+        ('general', 'Umumiy Test'),
+    ], default='general')
+    
     score = models.IntegerField()
     total_questions = models.IntegerField()
     time_taken = models.DurationField()

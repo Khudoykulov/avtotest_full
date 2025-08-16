@@ -131,6 +131,19 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s, box-shadow 0.3s;
             position: relative;
+            border: 3px solid transparent;
+        }
+        
+        .variant-card.attempted {
+            border-color: #17a2b8;
+        }
+        
+        .variant-card.passed {
+            border-color: #28a745;
+        }
+        
+        .variant-card.failed {
+            border-color: #dc3545;
         }
 
         .variant-card:hover {
@@ -232,6 +245,41 @@
             color: #dc3545;
             font-weight: bold;
         }
+        
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .status-new {
+            background: #6c757d;
+        }
+        
+        .status-attempted {
+            background: #17a2b8;
+        }
+        
+        .status-passed {
+            background: #28a745;
+        }
+        
+        .status-failed {
+            background: #dc3545;
+        }
+        
+        .result-info {
+            margin: 1rem 0;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
 
         .feature-highlight {
             background: linear-gradient(135deg, #e8f5e8, #d4edda);
@@ -306,8 +354,31 @@
                     <div class="info-label">Har Variantda Savollar</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-value">70%</div>
+                    <div class="info-value">18/20</div>
                     <div class="info-label">O'tish Bali</div>
+                </div>
+            </div>
+            
+            <!-- Umumiy test variant statistikasi -->
+            <div class="feature-highlight" style="margin-top: 2rem;">
+                <h4>📈 Sizning umumiy test yutuqlaringiz:</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #28a745;">{{ overall_stats.completed_variants }}/{{ overall_stats.total_variants }}</div>
+                        <div style="font-size: 0.9rem; color: #6c757d;">Topshirilgan variantlar</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #17a2b8;">{{ overall_stats.overall_correct_percentage }}%</div>
+                        <div style="font-size: 0.9rem; color: #6c757d;">To'g'ri javoblar</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #ffc107;">{{ overall_stats.passed_variants }}</div>
+                        <div style="font-size: 0.9rem; color: #6c757d;">Muvaffaqiyatli</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: #dc3545;">{{ overall_stats.pass_percentage }}%</div>
+                        <div style="font-size: 0.9rem; color: #6c757d;">O'tish foizi</div>
+                    </div>
                 </div>
             </div>
 
@@ -326,13 +397,46 @@
         <h2 style="color: white; text-align: center; margin-bottom: 2rem;">🚀 Test Variantlarini Tanlang</h2>
         <div class="variants-grid">
             {% for variant in variants %}
-            <div class="variant-card">
+            <div class="variant-card {% if variant.status.attempted %}{% if variant.status.passed %}passed{% else %}failed{% endif %}{% endif %}">
+                <!-- Status badge -->
+                {% if not variant.status.attempted %}
+                    <div class="status-badge status-new">Yangi</div>
+                {% elif variant.status.passed %}
+                    <div class="status-badge status-passed">O'tdi</div>
+                {% else %}
+                    <div class="status-badge status-failed">O'tmadi</div>
+                {% endif %}
+                
                 <div class="variant-number">{{ variant.id }}</div>
                 <div class="variant-icon">📋</div>
                 <h3>{{ variant.name }}</h3>
                 <p><strong>{{ variant.description }}</strong></p>
                 <p class="text-muted">{{ variant.questions_count }} ta savol</p>
+                
+                <!-- Natija ma'lumotlari -->
+                {% if variant.status.attempted %}
+                <div class="result-info">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span><strong>{{ variant.status.score }}/{{ variant.status.total }}</strong></span>
+                        <span style="color: {% if variant.status.passed %}#28a745{% else %}#dc3545{% endif %};">
+                            {{ variant.status.percentage }}%
+                        </span>
+                    </div>
+                    <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #6c757d;">
+                        Oxirgi urinish: {{ variant.status.last_attempt|date:"d.m.Y H:i" }}
+                    </div>
+                </div>
+                <a href="{% url 'quiz:take_general_test' variant.id %}" class="btn">
+                    {% if variant.status.passed %}Qayta ishlash{% else %}Yaxshilash{% endif %}
+                </a>
+                {% else %}
+                <div class="result-info">
+                    <div style="color: #6c757d; font-style: italic;">
+                        Hali ishlanmagan
+                    </div>
+                </div>
                 <a href="{% url 'quiz:take_general_test' variant.id %}" class="btn">Testni boshlash</a>
+                {% endif %}
             </div>
             {% empty %}
             <div style="grid-column: 1/-1; text-align: center; color: white;">
@@ -344,21 +448,27 @@
 
         {% if user_results %}
         <div class="results-section">
-            <h3>📈 Sizning umumiy test natijalaringiz</h3>
+            <h3>📈 Oxirgi umumiy test natijalaringiz</h3>
             <table class="results-table">
                 <thead>
                     <tr>
-                        <th>Test</th>
+                        <th>Variant</th>
                         <th style="text-align: center;">Natija</th>
                         <th style="text-align: center;">Holat</th>
-                        <th style="text-align: center;">Vaqt</th>
+                        <th style="text-align: center;">Foiz</th>
                         <th style="text-align: center;">Sana</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for result in user_results %}
                     <tr>
-                        <td>Umumiy Test</td>
+                        <td>
+                            {% if result.variant_id %}
+                                Variant {{ result.variant_id }}
+                            {% else %}
+                                Umumiy Test
+                            {% endif %}
+                        </td>
                         <td style="text-align: center;">{{ result.score }}/{{ result.total_questions }}</td>
                         <td style="text-align: center;">
                             {% if result.passed %}
@@ -368,13 +478,9 @@
                             {% endif %}
                         </td>
                         <td style="text-align: center;">
-                            {% if result.time_taken %}
-                                {{ result.time_taken|floatformat:0 }} daq
-                            {% else %}
-                                -
-                            {% endif %}
+                            <strong>{{ result.percentage }}%</strong>
                         </td>
-                        <td style="text-align: center;">{{ result.created_at|date:"d.m.Y" }}</td>
+                        <td style="text-align: center;">{{ result.created_at|date:"d.m.Y H:i" }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

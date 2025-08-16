@@ -200,8 +200,7 @@ class QuizApp {
                 time_taken: timeSpent,
                 test_type: this.getTestType(),
                 ticket_id: this.getTicketId(),
-                category_id: this.getCategoryId(),
-                variant_id: this.getVariantId()
+                category_id: this.getCategoryId()
             };
 
             const response = await fetch('/quiz/submit-test/', {
@@ -248,11 +247,6 @@ class QuizApp {
     getCategoryId() {
         const categoryIdElement = document.getElementById('category-id');
         return categoryIdElement ? categoryIdElement.value : null;
-    }
-
-    getVariantId() {
-        const variantIdElement = document.getElementById('variant-id');
-        return variantIdElement ? variantIdElement.value : null;
     }
 
     getCsrfToken() {

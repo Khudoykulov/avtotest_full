@@ -104,15 +104,64 @@ def submit_test_view(request):
             except Category.DoesNotExist:
                 pass
         
-        test_result = TestResult.objects.create(
-            user=request.user,
-            ticket=ticket_obj,
-            category=category_obj,
-            score=0,  # Will update after calculating
-            total_questions=total_questions,
-            time_taken=timedelta(seconds=time_taken),
-            passed=False  # Will update after calculating
-        )
+        # Test turini aniqlash
+        test_type_value = 'general'
+        variant_id_value = None
+        
+        if test_type == 'ticket':
+            test_type_value = 'ticket'
+        elif test_type == 'category':
+            test_type_value = 'category'
+        elif test_type == 'general':
+            test_type_value = 'general'
+            variant_id_value = data.get('variant_id')
+        
+        # Agar avval shu test ishlatilgan bo'lsa, yangi natija yaratish o'rniga yangisini yangilash
+        existing_result = None
+        if test_type_value == 'general' and variant_id_value:
+            # Umumiy test uchun variant bo'yicha tekshirish
+            existing_result = TestResult.objects.filter(
+                user=request.user,
+                test_type='general',
+                variant_id=variant_id_value
+            ).first()
+        elif test_type_value == 'ticket' and ticket_obj:
+            # Bilet testi uchun
+            existing_result = TestResult.objects.filter(
+                user=request.user,
+                ticket=ticket_obj,
+                test_type='ticket'
+            ).first()
+        elif test_type_value == 'category' and category_obj:
+            # Kategoriya testi uchun - eng oxirgi natijani yangilash
+            existing_result = TestResult.objects.filter(
+                user=request.user,
+                category=category_obj,
+                test_type='category'
+            ).order_by('-created_at').first()
+        
+        if existing_result:
+            # Mavjud natijani yangilash
+            test_result = existing_result
+            test_result.total_questions = total_questions
+            test_result.time_taken = timedelta(seconds=time_taken)
+            # score va passed keyinroq yangilanadi
+            
+            # Eski javoblarni o'chirish
+            UserAnswer.objects.filter(test_result=test_result).delete()
+        else:
+            # Yangi natija yaratish
+            test_result = TestResult.objects.create(
+                user=request.user,
+                ticket=ticket_obj,
+                category=category_obj,
+                test_type=test_type_value,
+                variant_id=variant_id_value,
+                score=0,  # Will update after calculating
+                total_questions=total_questions,
+                time_taken=timedelta(seconds=time_taken),
+                passed=False  # Will update after calculating
+            )
 
         # Process each answer
         for question_id, answer_id in answers.items():
@@ -132,7 +181,7 @@ def submit_test_view(request):
 
         # Update test result
         test_result.score = correct_answers
-        pass_threshold = total_questions * 0.7  # 70% to pass
+        pass_threshold = 18  # 18/20 = 90% to pass
         test_result.passed = correct_answers >= pass_threshold
         test_result.save()
         
@@ -1456,24 +1505,94 @@ def general_test_view(request):
     for i in range(1, variants_count + 1):
         start_index = (i - 1) * 20
         end_index = min(i * 20, total_questions)
+        
+        # Variant uchun foydalanuvchining natijasini tekshirish
+        variant_result = TestResult.objects.filter(
+            user=request.user,
+            test_type='general',
+            variant_id=i
+        ).first()
+        
+        status_info = {
+            'attempted': False,
+            'score': 0,
+            'total': 20,
+            'passed': False,
+            'last_attempt': None
+        }
+        
+        if variant_result:
+            status_info = {
+                'attempted': True,
+                'score': variant_result.score,
+                'total': variant_result.total_questions,
+                'passed': variant_result.passed,
+                'last_attempt': variant_result.created_at,
+                'percentage': round((variant_result.score / variant_result.total_questions) * 100, 1)
+            }
+        
         variants.append({
             'id': i,
             'name': f"Variant {i}",
             'description': f"{start_index + 1}-{end_index} savollar",
-            'questions_count': end_index - start_index
+            'questions_count': end_index - start_index,
+            'status': status_info
         })
     
-    # User's previous general test results
-    user_results = TestResult.objects.filter(
+    # Faqat umumiy test uchun statistika
+    completed_variants = TestResult.objects.filter(
         user=request.user,
-        category__isnull=True,
-        ticket__isnull=True
+        test_type='general'
+    ).values('variant_id').distinct().count()
+    
+    passed_variants = TestResult.objects.filter(
+        user=request.user,
+        test_type='general',
+        passed=True
+    ).values('variant_id').distinct().count()
+    
+    # Barcha bazadagi savollar soniga nisbatan to'g'ri javoblar foizini hisoblash
+    general_results = TestResult.objects.filter(
+        user=request.user,
+        test_type='general'
+    )
+    
+    # Bazadagi barcha savollar soni
+    from quiz.models import Question as QuestionModel
+    total_questions_in_db = QuestionModel.objects.count()
+    
+    if general_results.exists():
+        total_correct = sum([result.score for result in general_results])
+        overall_correct_percentage = round((total_correct / total_questions_in_db) * 100, 1) if total_questions_in_db > 0 else 0
+    else:
+        overall_correct_percentage = 0
+    
+    overall_stats = {
+        'total_variants': variants_count,
+        'completed_variants': completed_variants,
+        'passed_variants': passed_variants,
+        'completion_percentage': round((completed_variants / variants_count) * 100, 1) if variants_count > 0 else 0,
+        'pass_percentage': round((passed_variants / completed_variants) * 100, 1) if completed_variants > 0 else 0,
+        'overall_correct_percentage': overall_correct_percentage
+    }
+    
+    # User's previous general test results (barchasi) with percentage
+    user_results_raw = TestResult.objects.filter(
+        user=request.user,
+        test_type='general'
     ).order_by('-created_at')[:10]
+    
+    # Har bir natijaga foizni qo'shish
+    user_results = []
+    for result in user_results_raw:
+        result.percentage = round((result.score / result.total_questions) * 100, 1) if result.total_questions > 0 else 0
+        user_results.append(result)
     
     context = {
         'variants': variants,
         'total_questions': total_questions,
-        'user_results': user_results
+        'user_results': user_results,
+        'overall_stats': overall_stats
     }
     return render(request, 'quiz/general_test.html', context)
 

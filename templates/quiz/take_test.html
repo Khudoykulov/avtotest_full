@@ -114,6 +114,12 @@ const questions = [
     {% endfor %}
 ];
 
+// Hidden input values for test submission
+const testType = "{{ test_type }}";
+const ticketId = {% if ticket_id %}{{ ticket_id }}{% else %}null{% endif %};
+const categoryId = {% if category_id %}{{ category_id }}{% else %}null{% endif %};
+const variantId = {% if variant_id %}{{ variant_id }}{% else %}null{% endif %};
+
 let currentQuestionIndex = 0;
 let userAnswers = {};
 let timeLeft = 1200; // 20 minutes in seconds
@@ -492,7 +498,7 @@ function finishTest() {
         
         // Calculate percentage
         const percentage = Math.round((correctCount / questions.length) * 100);
-        const passed = percentage >= 70;
+        const passed = percentage >= 90;
         
         // Show detailed results
         showTestResults(correctCount, percentage, passed, incorrectAnswers);
@@ -523,7 +529,7 @@ function showTestResults(correctCount, percentage, passed, incorrectAnswers) {
                     ${correctCount}/${questions.length} (${percentage}%)
                 </div>
                 <p style="margin: 0; color: ${passed ? '#155724' : '#721c24'};">
-                    ${passed ? 'O\'tish uchun zarur: 70%' : 'Qayta urinib ko\'ring. O\'tish uchun zarur: 70%'}
+                    ${passed ? 'O\'tish uchun zarur: 18/20 (90%)' : 'Qayta urinib ko\'ring. O\'tish uchun zarur: 18/20 (90%)'}
                 </p>
             </div>
             
@@ -702,7 +708,7 @@ function showGenericRecommendations(correctCount) {
                 <p style="margin: 0; color: #666;">Siz juda yaxshi tayyorgarlik ko'rgansiz. Davom eting!</p>
             </div>
         `;
-    } else if (percentage >= 70) {
+    } else if (percentage >= 90) {
         recommendation = `
             <div style="text-align: center;">
                 <div style="font-size: 3rem; margin-bottom: 0.5rem;">👍</div>

@@ -2101,30 +2101,33 @@ def ai_analysis_view(request):
             wrong_answers = user_answers.filter(is_correct=False)
             
             # Bu test uchun maxsus AI prompt yaratish
-            test_specific_prompt = f"""
-            Bu foydalanuvchi hozirgina test topshirdi. Quyidagi ma'lumotlar asosida maxsus tahlil bering:{chr(10)}
-            TEST NATIJASI:{chr(10)}
-            - Umumiy ball: {test_result.score}/{test_result.total_questions}{chr(10)}
-            - Foiz: {round(test_result.score / test_result.total_questions * 100, 1)}%{chr(10)}
-            - Test turi: {'Kategoriya' if test_result.category else 'Umumiy'}{chr(10)}
-            - Kategoriya: {test_result.category.name_uz if test_result.category else 'Barcha mavzular'}{chr(10)}
-            XATO QILINGAN SAVOLLAR:{chr(10)}
+            test_specific_prompt = """
+            Bu foydalanuvchi hozirgina test topshirdi. Quyidagi ma'lumotlar asosida maxsus tahlil bering:
+
+            TEST NATIJASI:
+            - Umumiy ball: {test_result.score}/{test_result.total_questions}
+            - Foiz: {round(test_result.score / test_result.total_questions * 100, 1)}%
+            - Test turi: {'Kategoriya' if test_result.category else 'Umumiy'}
+            - Kategoriya: {test_result.category.name_uz if test_result.category else 'Barcha mavzular'}
+
+            XATO QILINGAN SAVOLLAR:
             """
             for i, wrong_answer in enumerate(wrong_answers[:5], 1):
                 correct_answer = wrong_answer.question.answers.filter(is_correct=True).first()
-                test_specific_prompt += f"""
-            {i}. SAVOL: {wrong_answer.question.question_text}{chr(10)}
-               KATEGORIA: {wrong_answer.question.category.name_uz}{chr(10)}
-               SIZNING JAVOBINGIZ: {wrong_answer.selected_answer.answer_text}{chr(10)}
-               TO'G'RI JAVOB: {correct_answer.answer_text if correct_answer else 'Noma\'lum'}{chr(10)}
+                test_specific_prompt += """
+            {i}. SAVOL: {wrong_answer.question.question_text}
+               KATEGORIA: {wrong_answer.question.category.name_uz}
+               SIZNING JAVOBINGIZ: {wrong_answer.selected_answer.answer_text}
+               TO'G'RI JAVOB: {correct_answer.answer_text if correct_answer else 'Nomalum'}
             """
-            test_specific_prompt += f"""
-            VAZIFA:{chr(10)}
-            1. Bu test natijasini qisqacha baholang{chr(10)}
-            2. Xato qilingan har bir savol uchun qisqa tushuntirish bering{chr(10)}
-            3. Keyingi testlarga qanday tayyorlanish kerakligini aytib bering{chr(10)}
-            4. 3-4 ta aniq maslahat bering{chr(10)}
-            Javobingizni o'zbek tilida, tushunarli va motivatsiyali qilib yozing.{chr(10)}
+            test_specific_prompt += """
+            VAZIFA:
+            1. Bu test natijasini qisqacha baholang
+            2. Xato qilingan har bir savol uchun qisqa tushuntirish bering
+            3. Keyingi testlarga qanday tayyorlanish kerakligini aytib bering
+            4. 3-4 ta aniq maslahat bering
+
+            Javobingizni o'zbek tilida, tushunarli va motivatsiyali qilib yozing.
             """
             
             # AI dan javob olish

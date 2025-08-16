@@ -102,7 +102,7 @@ const questions = [
         text: "{{ question.question_text|escapejs }}",
         image: {% if question.image %}"{{ question.image.url }}"{% else %}null{% endif %},
         answers: [
-            {% for answer in question.answers.all %}
+            {% for answer in question.shuffled_answers %}
             {
                 id: {{ answer.id }},
                 text: "{{ answer.answer_text|escapejs }}",

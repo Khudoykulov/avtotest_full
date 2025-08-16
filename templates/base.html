@@ -75,6 +75,40 @@
             gap: 1rem;
         }
 
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s;
+        }
+
+        .user-avatar:hover {
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: scale(1.1);
+        }
+
+        .user-avatar-placeholder {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s;
+        }
+
+        .user-avatar-placeholder:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -187,6 +221,14 @@
             .card {
                 padding: 1.5rem;
             }
+            
+            .user-info span {
+                display: none;
+            }
+            
+            .user-info {
+                gap: 0.5rem;
+            }
         }
     </style>
 </head>
@@ -203,6 +245,11 @@
             </ul>
             <div class="user-info">
                 {% if user.is_authenticated %}
+                    {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="user-avatar">
+                    {% else %}
+                        <div class="user-avatar-placeholder">{{ user.username|first|upper }}</div>
+                    {% endif %}
                     <span>Salom, {{ user.username }}!</span>
                     <a href="{% url 'account:profile' %}" class="btn btn-secondary">Profil</a>
                     <a href="{% url 'account:logout' %}" class="btn btn-secondary">Chiqish</a>

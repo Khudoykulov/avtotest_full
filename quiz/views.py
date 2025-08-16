@@ -9,7 +9,7 @@ from .models import Category, TestTicket, Question, TestResult, UserAnswer, Educ
 from .ai_analytics import get_ai_insights_for_user
 import json
 from datetime import timedelta, datetime
-from random import sample
+from random import sample, shuffle
 import math
 
 
@@ -50,7 +50,7 @@ def take_test_view(request, ticket_id=None, category_id=None):
 
     if ticket_id:
         ticket = get_object_or_404(TestTicket, ticket_number=ticket_id)
-        questions = ticket.questions.all()
+        questions = list(ticket.questions.all())
         test_type = 'ticket'
         test_name = f"Bilet {ticket.ticket_number}"
     elif category_id:
@@ -63,6 +63,12 @@ def take_test_view(request, ticket_id=None, category_id=None):
 
     if not questions:
         return redirect('quiz:categories')
+
+    # Har bir savol uchun javoblarni random qilish
+    for question in questions:
+        answers = list(question.answers.all())
+        shuffle(answers)  # Javoblarni aralashtirish
+        question.shuffled_answers = answers
 
     context = {
         'questions': questions,
@@ -188,10 +194,9 @@ def submit_test_view(request):
 
         # Update user stats
         user = request.user
-        user.total_tests_taken += 1
         if correct_answers > user.best_score:
             user.best_score = correct_answers
-        user.save()
+            user.save()
 
         return JsonResponse({
             'success': True,
@@ -1486,6 +1491,12 @@ def take_category_test_view(request, category_id):
             questions.extend(all_questions)
         questions = questions[:20]
     
+    # Har bir savol uchun javoblarni random qilish
+    for question in questions:
+        answers = list(question.answers.all())
+        shuffle(answers)  # Javoblarni aralashtirish
+        question.shuffled_answers = answers
+    
     context = {
         'questions': questions,
         'test_type': 'category',
@@ -1621,6 +1632,12 @@ def take_general_test_view(request, variant_id):
     if not questions:
         return redirect('quiz:general_test')
     
+    # Har bir savol uchun javoblarni random qilish
+    for question in questions:
+        answers = list(question.answers.all())
+        shuffle(answers)  # Javoblarni aralashtirish
+        question.shuffled_answers = answers
+    
     context = {
         'questions': questions,
         'test_type': 'general',
@@ -1657,6 +1674,12 @@ def take_ticket_test_view(request, ticket_id):
     
     if not questions:
         return redirect('quiz:tickets')
+    
+    # Har bir savol uchun javoblarni random qilish
+    for question in questions:
+        answers = list(question.answers.all())
+        shuffle(answers)  # Javoblarni aralashtirish
+        question.shuffled_answers = answers
     
     context = {
         'questions': questions,

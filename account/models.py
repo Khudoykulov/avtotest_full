@@ -6,10 +6,14 @@ class CustomUser(AbstractUser):
     """Custom user model with additional fields for driving test system"""
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     birth_date = models.DateField(blank=True, null=True)
-    total_tests_taken = models.IntegerField(default=0)
     best_score = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    @property
+    def total_tests_taken(self):
+        """Dinamik ravishda real test sonini hisoblash"""
+        return self.test_results.count()
 
     groups = models.ManyToManyField(
         'auth.Group',

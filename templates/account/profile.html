@@ -19,6 +19,8 @@
                 <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
                     <p><strong>Foydalanuvchi nomi:</strong> {{ user.username }}</p>
                     <p><strong>Email:</strong> {{ user.email|default:"Kiritilmagan" }}</p>
+                    <p><strong>Phone:</strong> {{ user.phone_number|default:"Kiritilmagan" }}</p>
+                    <p><strong>Phone:</strong> {{ user.profile.avatar|default:"Kiritilmagan" }}</p>
                     <p><strong>Ism:</strong> {{ user.first_name|default:"Kiritilmagan" }}</p>
                     <p><strong>Familiya:</strong> {{ user.last_name|default:"Kiritilmagan" }}</p>
                     <p><strong>Ro'yxatdan o'tgan sana:</strong> {{ user.date_joined|date:"d.m.Y" }}</p>
@@ -30,7 +32,7 @@
                 <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px;">
                     <p><strong>Jami testlar:</strong> {{ user.total_tests_taken }}</p>
                     <p><strong>Eng yaxshi natija:</strong> {{ user.best_score }}/20</p>
-                    <p><strong>Foiz:</strong> 
+                    <p><strong>Foiz:</strong>
                         {% if user.best_score > 0 %}
                             {{ user.best_score|floatformat:0 }}0%
                         {% else %}
@@ -46,5 +48,9 @@
             <a href="{% url 'home' %}" class="btn btn-secondary">Bosh sahifaga qaytish</a>
         </div>
     </div>
+    <a href="{% url 'account:profile_update' %}" class="btn btn-primary">
+    <i class="bi bi-pencil-square"></i> Ma'lumotlarni yangilash
+</a>
+
 </div>
 {% endblock %}

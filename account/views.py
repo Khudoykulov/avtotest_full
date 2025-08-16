@@ -59,3 +59,28 @@ def profile_view(request):
         'profile_form': profile_form,
     }
     return render(request, 'account/profile.html', context)
+
+
+@login_required
+def profile_update_view(request):
+    """Foydalanuvchi profilini yangilash"""
+    profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        user_form = UserUpdateForm(request.POST, instance=request.user)
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Profil muvaffaqiyatli yangilandi!')
+            return redirect('account:profile')  # profil sahifasiga qaytadi
+    else:
+        user_form = UserUpdateForm(instance=request.user)
+        profile_form = UserProfileForm(instance=profile)
+
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+    }
+    return render(request, 'account/profile_update.html', context)

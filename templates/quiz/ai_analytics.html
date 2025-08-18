@@ -64,23 +64,127 @@
     <!-- Test-specific analysis (if coming from test) -->
     <div id="test-specific-analysis" style="display: none; margin-bottom: 2rem;"></div>
 
-    <!-- AI Analysis -->
+    <!-- Umumiy AI Tahlili -->
     <div class="card ai-analysis" style="margin-bottom: 2rem;">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e9ecef;">
-            <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1rem; border-radius: 50%; font-size: 1.5rem;">
-                🧠
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e9ecef;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1rem; border-radius: 50%; font-size: 1.5rem;">
+                    🧠
+                </div>
+                <div>
+                    <h2 style="margin: 0; color: #333;">Umumiy AI Tahlili</h2>
+                    <p style="margin: 0; color: #6c757d;">Hamma testlaringizni tahlil qiling</p>
+                </div>
             </div>
-            <div>
-                <h2 style="margin: 0; color: #333;">AI Tahlili</h2>
-                <p style="margin: 0; color: #6c757d;" id="ai-analysis-subtitle">Gemini AI sizning xatolaringizni tahlil qildi</p>
-            </div>
+            
+            {% if not show_analysis %}
+            <form method="post" style="margin: 0;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="get_general_analysis">
+                <button type="submit" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
+                    🧠 AI Tahlil Olish
+                </button>
+            </form>
+            {% endif %}
         </div>
 
+        {% if show_analysis %}
         <div style="background: #f8f9fa; border-radius: 8px; padding: 2rem; border-left: 4px solid #667eea;">
             <div id="ai-text" style="white-space: pre-line; line-height: 1.6; font-size: 1.1rem; color: #333;">
                 {{ ai_insights.ai_analysis }}
             </div>
         </div>
+        {% else %}
+        <div style="background: #f8f9fa; border-radius: 8px; padding: 2rem; text-align: center; color: #6c757d;">
+            <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">🤖</div>
+            <p style="font-size: 1.1rem; margin: 0;">AI tahlilini olish uchun yuqoridagi tugmani bosing</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Testlar Ro'yxati va Alohida Tahlil -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 1rem; border-radius: 50%; font-size: 1.5rem;">
+                📋
+            </div>
+            <div>
+                <h2 style="margin: 0; color: #333;">Testlar Ro'yxati</h2>
+                <p style="margin: 0; color: #6c757d;">Har bir testni alohida tahlil qiling</p>
+            </div>
+        </div>
+
+        {% if user_results %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f8f9fa; border-bottom: 2px solid #e9ecef;">
+                        <th style="padding: 1rem; text-align: left; font-weight: 600; color: #333;">Test</th>
+                        <th style="padding: 1rem; text-align: center; font-weight: 600; color: #333;">Natija</th>
+                        <th style="padding: 1rem; text-align: center; font-weight: 600; color: #333;">Holat</th>
+                        <th style="padding: 1rem; text-align: center; font-weight: 600; color: #333;">Sana</th>
+                        <th style="padding: 1rem; text-align: center; font-weight: 600; color: #333;">AI Tahlil</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in user_results %}
+                    <tr style="border-bottom: 1px solid #e9ecef;">
+                        <td style="padding: 1rem;">
+                            {% if result.ticket %}
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="background: #667eea; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">BILET</span>
+                                    Bilet {{ result.ticket.ticket_number }}
+                                </div>
+                            {% elif result.category %}
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="background: #28a745; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">KATEGORIYA</span>
+                                    {{ result.category.name_uz }}
+                                </div>
+                            {% else %}
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="background: #ffc107; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">UMUMIY</span>
+                                    Umumiy Test
+                                </div>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <div style="font-weight: bold; font-size: 1.1rem;">
+                                {{ result.score }}/{{ result.total_questions }}
+                            </div>
+                            <div style="font-size: 0.9rem; color: #6c757d;">
+                                {% widthratio result.score result.total_questions 100 %}%
+                            </div>
+                        </td>
+                        <td style="padding: 1rem; text-align: center;">
+                            {% if result.passed %}
+                                <span style="background: #d4edda; color: #155724; padding: 0.5rem 1rem; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">✅ O'tdi</span>
+                            {% else %}
+                                <span style="background: #f8d7da; color: #721c24; padding: 0.5rem 1rem; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">❌ O'tmadi</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 1rem; text-align: center; color: #6c757d;">
+                            {{ result.created_at|date:"d.m.Y H:i" }}
+                        </td>
+                        <td style="padding: 1rem; text-align: center;">
+                            <a href="{% url 'quiz:single_test_analysis' result.id %}" 
+                               style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 0.75rem 1.5rem; border-radius: 6px; text-decoration: none; font-weight: bold; transition: all 0.3s; display: inline-flex; align-items: center; gap: 0.5rem;">
+                                🔍 Tahlil
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 3rem; color: #6c757d;">
+            <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📝</div>
+            <p style="font-size: 1.1rem; margin: 0;">Hali hech qanday test topshirmadingiz</p>
+            <a href="{% url 'quiz:categories' %}" style="display: inline-block; margin-top: 1rem; background: #667eea; color: white; padding: 0.75rem 1.5rem; border-radius: 6px; text-decoration: none;">
+                Birinchi testni boshlash
+            </a>
+        </div>
+        {% endif %}
     </div>
 
     <!-- AI Recommendations -->

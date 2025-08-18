@@ -145,8 +145,18 @@ Javobingiz aniq, foydali va o'zbek tilida bo'lsin. Har bir maslahat amaliy bo'li
             }
             
         except Exception as e:
+            error_msg = str(e)
+            if "quota" in error_msg.lower() or "429" in error_msg:
+                ai_message = "AI xizmati hozircha ishlamayapti (quota tugagan). Keyinroq urinib ko'ring."
+            elif "404" in error_msg or "not found" in error_msg.lower():
+                ai_message = "AI xizmati hozircha ishlamayapti (model topilmadi). Keyinroq urinib ko'ring."
+            elif "network" in error_msg.lower() or "connection" in error_msg.lower():
+                ai_message = "Internet aloqasida muammo. Iltimos tarmoq ulanishini tekshiring."
+            else:
+                ai_message = "AI tahlil xizmati hozircha ishlamayapti. Keyinroq urinib ko'ring."
+            
             return {
-                'ai_analysis': f"AI tahlil xizmatida xatolik yuz berdi. Iltimos keyinroq urinib ko'ring. Xato: {str(e)}",
+                'ai_analysis': ai_message,
                 'recommendations': [],
                 'confidence': 0
             }
@@ -342,8 +352,18 @@ Javobingiz aniq, batafsil va o'zbek tilida bo'lsin. Har bir xato uchun aniq tush
             }
             
         except Exception as e:
+            error_msg = str(e)
+            if "quota" in error_msg.lower() or "429" in error_msg:
+                ai_message = "AI xizmati hozircha ishlamayapti (quota tugagan). Keyinroq urinib ko'ring."
+            elif "404" in error_msg or "not found" in error_msg.lower():
+                ai_message = "AI xizmati hozircha ishlamayapti (model topilmadi). Keyinroq urinib ko'ring."
+            elif "network" in error_msg.lower() or "connection" in error_msg.lower():
+                ai_message = "Internet aloqasida muammo. Iltimos tarmoq ulanishini tekshiring."
+            else:
+                ai_message = "AI tahlil xizmati hozircha ishlamayapti. Keyinroq urinib ko'ring."
+                
             return {
-                'ai_analysis': f"AI tahlil xizmatida xatolik yuz berdi: {str(e)}",
+                'ai_analysis': ai_message,
                 'recommendations': [],
                 'confidence': 0,
                 'test_specific': True

@@ -6,7 +6,7 @@ from django.db.models import Avg, Count, Q, Max
 from django.db.models.functions import TruncDate
 from django.db import models
 from .models import Category, TestTicket, Question, TestResult, UserAnswer, EducationContent, UserProgress
-from .ai_analytics import get_ai_insights_for_user
+from .ai_analytics import get_ai_insights_for_user, get_ai_analysis_for_single_test
 import json
 from datetime import timedelta, datetime
 from random import sample, shuffle
@@ -1370,7 +1370,7 @@ def test_results_view(request, result_id):
     # Get AI insights for this specific test
     ai_insights = None
     try:
-        from .ai_analytics import get_ai_insights_for_user
+        from .ai_analytics import get_ai_insights_for_user, get_ai_analysis_for_single_test
         ai_insights = get_ai_insights_for_user(request.user)
     except Exception as e:
         pass
@@ -1956,42 +1956,59 @@ def detailed_statistics_view(request):
 
 @login_required 
 def ai_analytics_view(request):
-    """AI Statistik sahifasi"""
-    try:
-        # AI tahlilini olish
-        ai_insights = get_ai_insights_for_user(request.user)
-        
-        # Qo'shimcha statistika
-        user_results = TestResult.objects.filter(user=request.user)
-        basic_stats = {
-            'total_tests': user_results.count(),
-            'avg_score': user_results.aggregate(Avg('score'))['score__avg'] or 0,
-            'last_test_date': user_results.order_by('-created_at').first().created_at if user_results.exists() else None
-        }
-        
-        context = {
-            'ai_insights': ai_insights,
-            'basic_stats': basic_stats,
-            'user': request.user
-        }
-        
-    except Exception as e:
-        # Xatolik bo'lsa standart xabar
-        context = {
-            'ai_insights': {
-                'ai_analysis': f"AI xizmati vaqtincha mavjud emas. Iltimos keyinroq urinib ko'ring. Xato: {str(e)}",
-                'recommendations': [],
-                'confidence': 0
-            },
-            'basic_stats': {
-                'total_tests': 0,
-                'avg_score': 0,
-                'last_test_date': None
-            },
-            'user': request.user
-        }
+    """AI Statistik sahifasi - tugma bosganda AI tahlil qiladi"""
+    
+    # Asosiy statistika (har doim ko'rsatiladi)
+    user_results = TestResult.objects.filter(user=request.user).order_by('-created_at')
+    basic_stats = {
+        'total_tests': user_results.count(),
+        'avg_score': user_results.aggregate(Avg('score'))['score__avg'] or 0,
+        'last_test_date': user_results.first().created_at if user_results.exists() else None
+    }
+    
+    # AI tahlili faqat tugma bosilganda
+    ai_insights = None
+    if request.method == 'POST' and request.POST.get('action') == 'get_general_analysis':
+        try:
+            ai_insights = get_ai_insights_for_user(request.user)
+        except Exception as e:
+            ai_insights = {'ai_analysis': f'AI xizmatida xato: {str(e)}', 'recommendations': []}
+    
+    # Context har doim qaytariladi
+    context = {
+        'ai_insights': ai_insights,
+        'basic_stats': basic_stats,
+        'user_results': user_results,
+        'user': request.user,
+        'show_analysis': ai_insights is not None
+    }
     
     return render(request, 'quiz/ai_analytics.html', context)
+
+
+@login_required
+def single_test_analysis_view(request, test_id):
+    """Bitta test uchun AI tahlil"""
+    try:
+        test_result = get_object_or_404(TestResult, id=test_id, user=request.user)
+        
+        ai_analysis = None
+        if request.method == 'POST' and request.POST.get('action') == 'get_test_analysis':
+            try:
+                ai_analysis = get_ai_analysis_for_single_test(test_result)
+            except Exception as e:
+                ai_analysis = {'ai_analysis': f'AI xizmatida xato: {str(e)}', 'recommendations': []}
+        
+        context = {
+            'test_result': test_result,
+            'ai_analysis': ai_analysis,
+            'show_analysis': ai_analysis is not None
+        }
+        
+        return render(request, 'quiz/single_test_analysis.html', context)
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
 
 
 @login_required
@@ -2113,7 +2130,7 @@ def ai_analysis_view(request):
             test_result = get_object_or_404(TestResult, id=test_result_id, user=request.user)
             
             # AI tahlilini olish
-            from .ai_analytics import get_ai_insights_for_user
+            from .ai_analytics import get_ai_insights_for_user, get_ai_analysis_for_single_test
             ai_insights = get_ai_insights_for_user(request.user)
             
             # Test-specific AI analysis

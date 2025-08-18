@@ -29,6 +29,7 @@ urlpatterns = [
     path('statistics/', views.statistics_view, name='statistics'),
     path('detailed-statistics/', views.detailed_statistics_view, name='detailed_statistics'),
     path('ai-analytics/', views.ai_analytics_view, name='ai_analytics'),
+    path('test-analysis/<int:test_id>/', views.single_test_analysis_view, name='single_test_analysis'),
     path('analytics/', views.analytics_view, name='analytics'),
     
     # Ta'lim materiallari

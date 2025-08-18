@@ -167,41 +167,41 @@
     {% endif %}
 
     <!-- Performance Insights -->
-    <div class="card" style="margin-bottom: 2rem;">
-        <h3 style="color: #667eea; margin-bottom: 1.5rem;">💡 Tahlil va tavsiyalar</h3>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-            <!-- Strength Analysis -->
-            <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #28a745;">
-                <h4 style="color: #28a745; margin-bottom: 1rem;">🎯 Kuchli tomonlar</h4>
-                {% if stats.best_score >= 18 %}
-                    <p style="color: #333; margin-bottom: 0.5rem;">• A'lo natijalar ko'rsatyapsiz</p>
-                    <p style="color: #333; margin-bottom: 0.5rem;">• Bilimlaringiz yuqori darajada</p>
-                {% elif stats.best_score >= 14 %}
-                    <p style="color: #333; margin-bottom: 0.5rem;">• Yaxshi natijalar bor</p>
-                    <p style="color: #333; margin-bottom: 0.5rem;">• Asosiy qoidalarni bilasiz</p>
-                {% else %}
-                    <p style="color: #333; margin-bottom: 0.5rem;">• Harakat qilyapsiz</p>
-                    <p style="color: #333; margin-bottom: 0.5rem;">• Taraqqiyot yo'lida</p>
-                {% endif %}
-            </div>
+<!--    <div class="card" style="margin-bottom: 2rem;">-->
+<!--        <h3 style="color: #667eea; margin-bottom: 1.5rem;">💡 Tahlil va tavsiyalar</h3>-->
+<!--        -->
+<!--        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">-->
+<!--            &lt;!&ndash; Strength Analysis &ndash;&gt;-->
+<!--            <div style="background: #e8f5e8; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #28a745;">-->
+<!--                <h4 style="color: #28a745; margin-bottom: 1rem;">🎯 Kuchli tomonlar</h4>-->
+<!--                {% if stats.best_score >= 18 %}-->
+<!--                    <p style="color: #333; margin-bottom: 0.5rem;">• A'lo natijalar ko'rsatyapsiz</p>-->
+<!--                    <p style="color: #333; margin-bottom: 0.5rem;">• Bilimlaringiz yuqori darajada</p>-->
+<!--                {% elif stats.best_score >= 14 %}-->
+<!--                    <p style="color: #333; margin-bottom: 0.5rem;">• Yaxshi natijalar bor</p>-->
+<!--                    <p style="color: #333; margin-bottom: 0.5rem;">• Asosiy qoidalarni bilasiz</p>-->
+<!--                {% else %}-->
+<!--                    <p style="color: #333; margin-bottom: 0.5rem;">• Harakat qilyapsiz</p>-->
+<!--                    <p style="color: #333; margin-bottom: 0.5rem;">• Taraqqiyot yo'lida</p>-->
+<!--                {% endif %}-->
+<!--            </div>-->
 
-            <!-- Improvement Areas -->
-            <div style="background: #fff3cd; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #ffc107;">
-                <h4 style="color: #856404; margin-bottom: 1rem;">📈 Yaxshilash kerak</h4>
-                {% if stats.average_score < 14 %}
-                    <p style="color: #333; margin-bottom: 0.5rem;">• Ko'proq mashq qiling</p>
-                    <p style="color: #333; margin-bottom: 0.5rem;">• Nazariy bilimlarni mustahkamlang</p>
-                {% elif stats.average_score < 16 %}
-                    <p style="color: #333; margin-bottom: 0.5rem;">• Qiyin mavzularga e'tibor bering</p>
-                    <p style="color: #333; margin-bottom: 0.5rem;">• Muntazam test topshiring</p>
-                {% else %}
-                    <p style="color: #333; margin-bottom: 0.5rem;">• Barqarorlikni saqlang</p>
-                    <p style="color: #333; margin-bottom: 0.5rem;">• Yangi mavzularni o'rganing</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
+<!--            &lt;!&ndash; Improvement Areas &ndash;&gt;-->
+<!--            <div style="background: #fff3cd; padding: 1.5rem; border-radius: 12px; border-left: 4px solid #ffc107;">-->
+<!--                <h4 style="color: #856404; margin-bottom: 1rem;">📈 Yaxshilash kerak</h4>-->
+<!--                {% if stats.average_score < 14 %}-->
+<!--                    <p style="color: #333; margin-bottom: 0.5rem;">• Ko'proq mashq qiling</p>-->
+<!--                    <p style="color: #333; margin-bottom: 0.5rem;">• Nazariy bilimlarni mustahkamlang</p>-->
+<!--                {% elif stats.average_score < 16 %}-->
+<!--                    <p style="color: #333; margin-bottom: 0.5rem;">• Qiyin mavzularga e'tibor bering</p>-->
+<!--                    <p style="color: #333; margin-bottom: 0.5rem;">• Muntazam test topshiring</p>-->
+<!--                {% else %}-->
+<!--                    <p style="color: #333; margin-bottom: 0.5rem;">• Barqarorlikni saqlang</p>-->
+<!--                    <p style="color: #333; margin-bottom: 0.5rem;">• Yangi mavzularni o'rganing</p>-->
+<!--                {% endif %}-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
 
     <!-- Action Buttons -->
     <div class="text-center">

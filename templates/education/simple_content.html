@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ content.title }} - Ta'lim - Avtotest{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="mb-3">
+        <a href="{% url 'education:category' content.category.id %}" class="btn btn-secondary">
+            ⬅ {{ content.category.name_uz }}ga qaytish
+        </a>
+    </div>
+    
+    <h1>{{ content.title }}</h1>
+    
+    <!-- VIDEO CONTENT -->
+    {% if content.content_type == 'video' and content.video_url %}
+        {% load video_filters %}
+        
+        <div style="background: #f8f9fa; padding: 2rem; border-radius: 12px; margin: 2rem 0;">
+            <h3>🎥 Video Dars</h3>
+            
+            {% if content.video_url|is_youtube %}
+                <!-- YouTube Video -->
+                <div style="margin: 1rem 0;">
+                    <div style="background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h4>YouTube Video</h4>
+                        <p><strong>Video ID:</strong> {{ content.video_url|youtube_video_id }}</p>
+                        <p><strong>Original URL:</strong> {{ content.video_url }}</p>
+                        
+                        <!-- Simple YouTube Embed -->
+                        <div style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%; margin: 1rem 0; background: #000; border-radius: 8px; overflow: hidden;">
+                            <iframe 
+                                src="{{ content.video_url|youtube_embed_url }}"
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                        
+                        <!-- Alternative -->
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <a href="{{ content.video_url }}" target="_blank" class="btn btn-primary">
+                                YouTube da ochish
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <!-- Regular Video -->
+                <video controls style="width: 100%; max-height: 400px; border-radius: 8px;">
+                    <source src="{{ content.video_url }}" type="video/mp4">
+                    Video yuklanmadi
+                </video>
+            {% endif %}
+        </div>
+    {% endif %}
+    
+    <!-- IMAGE CONTENT -->
+    {% if content.content_type == 'image' and content.image %}
+        <div style="text-align: center; margin: 2rem 0;">
+            <img src="{{ content.image.url }}" alt="{{ content.title }}" 
+                 style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+        </div>
+    {% endif %}
+    
+    <!-- TEXT CONTENT -->
+    {% if content.text_content %}
+        <div style="background: white; padding: 2rem; border-radius: 8px; margin: 2rem 0; line-height: 1.8;">
+            {{ content.text_content|linebreaks }}
+        </div>
+    {% endif %}
+    
+    <div class="mt-4">
+        <a href="{% url 'quiz:take_category_test' content.category.id %}" class="btn btn-primary">
+            Test topshirish
+        </a>
+    </div>
+</div>
+{% endblock %}

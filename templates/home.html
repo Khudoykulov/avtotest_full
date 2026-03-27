@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avtotest - Haydovchilik guvohnomasi olish uchun professional test topshiring</title>
+<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* ===== NAVBAR (ikkinchi fayldan olingan) ===== */
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo img,
+        .logo .logo-icon {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .logo-text .logo-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .logo-text .logo-subtitle {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .user-info {
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s;
+        }
+
+        .user-avatar:hover {
+            border-color: rgba(255, 255, 255, 0.8);
+            transform: scale(1.1);
+        }
+
+        .user-avatar-placeholder {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s;
+        }
+
+        .user-avatar-placeholder:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .btn-nav {
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+            display: inline-block;
+        }
+
+        .btn-nav-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-nav-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .btn-nav-outline {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+        }
+
+        .btn-nav-outline:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            color: white;
+        }
+        /* ===== NAVBAR TUGADI ===== */
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 4rem;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .action-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .action-card h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .action-card p {
+            color: #6c757d;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            margin-left: 1rem;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f8f9ff;
+            border-radius: 12px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .recent-results {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .results-table th {
+            background: #f8f9ff;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-passed {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .status-failed {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .welcome-card {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .action-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .user-info span {
+                display: none;
+            }
+
+            .user-info {
+                gap: 0.5rem;
+            }
+        }
+    </style></head>
+<body>
+    <header class="header">
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="{% url 'home' %}" class="logo">
+            <span>🚗</span>
+            <span>Avtotest</span>
+        </a>
+        <ul class="nav-links">
+            <li>
+                <a href="{% url 'home' %}"
+                   class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                    Bosh sahifa
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'quiz:categories' %}"
+                   class="{% if 'categories' in request.path or 'quiz' in request.path %}active{% endif %}">
+                    Testlar
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'quiz:statistics' %}"
+                   class="{% if 'statistics' in request.path %}active{% endif %}">
+                    Statistika
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'quiz:ai_analytics' %}"
+                   class="{% if 'ai_analytics' in request.path %}active{% endif %}">
+                    🤖 AI Statistik
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'quiz:education' %}"
+                   class="{% if 'education' in request.path %}active{% endif %}">
+                    Ta'lim
+                </a>
+            </li>
+        </ul>
+        <div class="user-info">
+            {% if user.is_authenticated %}
+                {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" class="user-avatar">
+                {% else %}
+                    <div class="user-avatar-placeholder">{{ user.username|first|upper }}</div>
+                {% endif %}
+                <span>Salom, {{ user.username }}!</span>
+                <a href="{% url 'account:profile' %}" class="btn-nav btn-nav-primary">Profil</a>
+                <a href="{% url 'account:logout' %}" class="btn-nav btn-nav-outline">Chiqish</a>
+            {% else %}
+                <a href="{% url 'account:login' %}" class="btn-nav btn-nav-primary">Kirish</a>
+                <a href="{% url 'account:register' %}" class="btn-nav btn-nav-outline">Ro'yxatdan o'tish</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>    </header>
+
+    <div class="container">
+        <div class="hero">
+            <h1>Nima uchun aynan bizni tanlaysiz?</h1>
+            <p>Professional haydovchilik guvohnomasiga tayyorgarlik uchun eng mukammal platforma</p>
+        </div>
+
+        <div class="action-cards">
+            <!-- 1-bo'lim: Kategoriya bo'yicha Test -->
+            <div class="action-card">
+                <div class="action-icon">📋</div>
+                <h3>Kategoriya bo'yicha Test</h3>
+                <p>Yo'l belgilari, qoidalar va boshqa kategoriyalar bo'yicha alohida testlar ishlang va o'z bilimingizni sinab ko'ring</p>
+                <a href="{% url 'quiz:categories' %}" class="btn">Boshlash</a>
+            </div>
+
+            <!-- 2-bo'lim: Umumiy Test -->
+            <div class="action-card">
+                <div class="action-icon">📝</div>
+                <h3>Umumiy Test</h3>
+                <p>Barcha kategoriyalardan 20 tadan savollar bilan ketma-ket variantlar ishlang. To'liq tayyorgarlik uchun</p>
+                <a href="{% url 'quiz:general_test' %}" class="btn">Boshlash</a>
+            </div>
+
+            <!-- 3-bo'lim: Biletlik Test -->
+            <div class="action-card">
+                <div class="action-icon">🎫</div>
+                <h3>Biletlik Test</h3>
+                <p>Tasodifiy tanlangan savollar bilan haqiqiy imtihon kabi test ishlang va bilimingizni tekshiring</p>
+                <a href="{% url 'quiz:tickets' %}" class="btn">Boshlash</a>
+            </div>
+        </div>
+
+        <!-- Qo'shimcha bo'limlar -->
+        <div class="action-cards" style="margin-top: 2rem;">
+            <div class="action-card">
+                <div class="action-icon">📊</div>
+                <h3>Statistika va Tahlil</h3>
+                <p>O'z natijalaringizni kuzatib boring, xatolaringizni tahlil qiling va taraqqiyotingizni ko'ring</p>
+                <a href="{% url 'quiz:statistics' %}" class="btn">Ko'rish</a>
+            </div>
+
+            <div class="action-card">
+                <div class="action-icon">📚</div>
+                <h3>Ta'lim Materiallari</h3>
+                <p>Video darslar, matnli materiallar va rasmlar orqali yo'l harakati qoidalarini o'rganing</p>
+                <a href="{% url 'quiz:education' %}" class="btn">O'rganish</a>
+            </div>
+
+            <div class="action-card">
+                <div class="action-icon">🎯</div>
+                <h3>Tavsiyalar</h3>
+                <p>Test natijalaringiz asosida shaxsiy tavsiyalar oling va zaif joylaringizni yaxshilang</p>
+                <a href="{% url 'quiz:recommendations' %}" class="btn">Tavsiyalar</a>
+            </div>
+        </div>
+
+        {% if user.is_authenticated %}
+        <div class="stats-card">
+            <h2 style="color: #667eea; margin-bottom: 1.5rem; text-align: center;">📊 Sizning statistikangiz</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value">{{ user.total_tests_taken|default:0 }}</div>
+                    <div class="stat-label">Jami testlar</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">{{ user.best_score|default:0 }}/20</div>
+                    <div class="stat-label">Eng yaxshi natija</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">
+                        {% if user.best_score > 0 %}{{ user.best_score|floatformat:0 }}0%{% else %}0%{% endif %}
+                    </div>
+                    <div class="stat-label">Muvaffaqiyat foizi</div>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <a href="{% url 'quiz:statistics' %}" class="btn">Batafsil statistika</a>
+                <a href="{% url 'quiz:recommendations' %}" class="btn-secondary">Tavsiyalar</a>
+            </div>
+        </div>
+
+        {% if recent_results %}
+        <div class="recent-results">
+            <h3 style="color: #667eea; margin-bottom: 1rem;">📈 So'nggi natijalar</h3>
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Test</th>
+                        <th style="text-align: center;">Natija</th>
+                        <th style="text-align: center;">Holat</th>
+                        <th style="text-align: center;">Sana</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in recent_results %}
+                    <tr>
+                        <td>
+                            {% if result.ticket %}
+                                Bilet {{ result.ticket.ticket_number }}
+                            {% else %}
+                                {{ result.category.name_uz }}
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center;">
+                            {{ result.score }}/{{ result.total_questions }}
+                        </td>
+                        <td style="text-align: center;">
+                            {% if result.passed %}
+                                <span class="status-passed">O'tdi</span>
+                            {% else %}
+                                <span class="status-failed">O'tmadi</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center;">
+                            {{ result.created_at|date:"d.m.Y" }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="welcome-card">
+            <h2 style="color: #667eea; margin-bottom: 1rem;">🎯 Testlarni boshlash uchun tizimga kiring</h2>
+            <p style="color: #6c757d; margin-bottom: 2rem; font-size: 1.1rem;">
+                Statistikangizni kuzatish va shaxsiy tavsiyalar olish uchun ro'yxatdan o'ting
+            </p>
+            <div>
+                <a href="{% url 'account:login' %}" class="btn">Kirish</a>
+                <a href="{% url 'account:register' %}" class="btn-secondary">Ro'yxatdan o'tish</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

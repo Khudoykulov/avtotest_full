@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+
+{% block title %}Test Tahlili - {{ test_result.score }}/{{ test_result.total_questions }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto;">
+    <!-- Test Header -->
+    <div class="card test-header" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; margin-bottom: 2rem; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: 20px; right: 20px; font-size: 3rem; opacity: 0.3;">🎯</div>
+        <div style="position: relative; z-index: 2;">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <div style="background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 50%; font-size: 2rem;">
+                    🔍
+                </div>
+                <div>
+                    <h1 style="margin: 0; font-size: 2.5rem;">Test Tahlili</h1>
+                    <p style="margin: 0; opacity: 0.9;">Bu test uchun maxsus AI tavsiyalari</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Ma'lumotlari -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="background: #667eea; color: white; padding: 1rem; border-radius: 50%; font-size: 1.5rem;">
+                📊
+            </div>
+            <div>
+                <h2 style="margin: 0; color: #333;">Test Ma'lumotlari</h2>
+                <p style="margin: 0; color: #6c757d;">{{ test_result.created_at|date:"d.m.Y H:i" }}</p>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+            <!-- Test Turi -->
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #667eea;">
+                <div style="color: #667eea; font-size: 1.2rem; margin-bottom: 0.5rem;">📝</div>
+                <div style="font-size: 0.9rem; color: #6c757d; margin-bottom: 0.5rem;">Test turi</div>
+                <div style="font-weight: bold; color: #333;">
+                    {% if test_result.ticket %}
+                        Bilet {{ test_result.ticket.ticket_number }}
+                    {% elif test_result.category %}
+                        {{ test_result.category.name_uz }}
+                    {% else %}
+                        {{ test_result.get_test_type_display }}
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Natija -->
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid {% if test_result.passed %}#28a745{% else %}#dc3545{% endif %};">
+                <div style="color: {% if test_result.passed %}#28a745{% else %}#dc3545{% endif %}; font-size: 1.2rem; margin-bottom: 0.5rem;">
+                    {% if test_result.passed %}🏆{% else %}📈{% endif %}
+                </div>
+                <div style="font-size: 0.9rem; color: #6c757d; margin-bottom: 0.5rem;">Natija</div>
+                <div style="font-weight: bold; color: #333;">
+                    {{ test_result.score }}/{{ test_result.total_questions }}
+                    <span style="font-size: 0.9rem; color: #6c757d;">
+                        ({% widthratio test_result.score test_result.total_questions 100 %}%)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Vaqt -->
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ffc107;">
+                <div style="color: #ffc107; font-size: 1.2rem; margin-bottom: 0.5rem;">⏱️</div>
+                <div style="font-size: 0.9rem; color: #6c757d; margin-bottom: 0.5rem;">Sarflangan vaqt</div>
+                <div style="font-weight: bold; color: #333;">{{ test_result.time_taken }}</div>
+            </div>
+
+            <!-- Holat -->
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 8px; border-left: 4px solid {% if test_result.passed %}#28a745{% else %}#dc3545{% endif %};">
+                <div style="color: {% if test_result.passed %}#28a745{% else %}#dc3545{% endif %}; font-size: 1.2rem; margin-bottom: 0.5rem;">
+                    {% if test_result.passed %}✅{% else %}❌{% endif %}
+                </div>
+                <div style="font-size: 0.9rem; color: #6c757d; margin-bottom: 0.5rem;">Holat</div>
+                <div style="font-weight: bold; color: {% if test_result.passed %}#28a745{% else %}#dc3545{% endif %};">
+                    {% if test_result.passed %}O'tdi{% else %}O'tmadi{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Tahlil -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e9ecef;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1rem; border-radius: 50%; font-size: 1.5rem;">
+                    🤖
+                </div>
+                <div>
+                    <h2 style="margin: 0; color: #333;">AI Tahlil</h2>
+                    <p style="margin: 0; color: #6c757d;">Bu test uchun maxsus tavsiyalar</p>
+                </div>
+            </div>
+            
+            {% if not show_analysis %}
+            <form method="post" style="margin: 0;">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="get_test_analysis">
+                <button type="submit" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
+                    🧠 Test Tahlili
+                </button>
+            </form>
+            {% endif %}
+        </div>
+
+        {% if show_analysis %}
+        <div style="background: #f8f9fa; border-radius: 8px; padding: 2rem; border-left: 4px solid #667eea;">
+            <div style="white-space: pre-line; line-height: 1.6; font-size: 1.1rem; color: #333;">
+                {{ ai_analysis.ai_analysis }}
+            </div>
+        </div>
+
+        <!-- AI Tavsiyalar -->
+        {% if ai_analysis.recommendations %}
+        <div style="margin-top: 2rem;">
+            <h3 style="color: #333; margin-bottom: 1rem; display: flex; align-items: center;">
+                <span style="margin-right: 0.5rem;">🎯</span>
+                AI Tavsiyalari
+            </h3>
+            <div style="display: grid; gap: 1rem;">
+                {% for rec in ai_analysis.recommendations %}
+                <div style="background: 
+                    {% if rec.priority == 'urgent' %}linear-gradient(135deg, #dc3545, #c82333)
+                    {% elif rec.priority == 'high' %}linear-gradient(135deg, #fd7e14, #e55a4e)
+                    {% elif rec.priority == 'medium' %}linear-gradient(135deg, #ffc107, #e0a800)
+                    {% else %}linear-gradient(135deg, #28a745, #20c997){% endif %}; 
+                    color: white; border-radius: 8px; padding: 1.5rem; position: relative; overflow: hidden;">
+                    
+                    <div style="position: absolute; top: 10px; right: 15px; font-size: 2rem; opacity: 0.3;">{{ rec.icon }}</div>
+                    
+                    <div style="position: relative; z-index: 2;">
+                        <h4 style="margin: 0 0 0.5rem 0; font-size: 1.2rem;">{{ rec.title }}</h4>
+                        <p style="margin: 0 0 1rem 0; opacity: 0.9;">{{ rec.description }}</p>
+                        
+                        {% if rec.action_url %}
+                        <a href="{{ rec.action_url }}" 
+                           style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; font-weight: bold;">
+                            Harakat qiling →
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div style="background: #f8f9fa; border-radius: 8px; padding: 3rem; text-align: center; color: #6c757d;">
+            <div style="font-size: 4rem; margin-bottom: 1rem; opacity: 0.3;">🤖</div>
+            <p style="font-size: 1.2rem; margin-bottom: 1rem;">Bu test uchun AI tahlilini olish</p>
+            <p style="margin: 0; font-size: 0.9rem;">Yuqoridagi tugmani bosib, bu testdagi xatolaringiz va yaxshilanish yo'llarini bilib oling</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Navigation -->
+    <div class="card" style="background: linear-gradient(135deg, #6f42c1 0%, #6610f2 100%); color: white;">
+        <h2 style="margin: 0 0 1.5rem 0; display: flex; align-items: center;">
+            <span style="margin-right: 0.5rem;">🚀</span>
+            Keyingi qadamlar
+        </h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <a href="{% url 'quiz:ai_analytics' %}" 
+               style="background: rgba(255,255,255,0.2); padding: 1.5rem; border-radius: 8px; text-decoration: none; color: white; text-align: center; transition: all 0.3s;"
+               onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
+                <div style="font-weight: bold;">Umumiy statistika</div>
+                <small>Hamma testlaringizni ko'ring</small>
+            </a>
+
+            <a href="{% url 'quiz:categories' %}" 
+               style="background: rgba(255,255,255,0.2); padding: 1.5rem; border-radius: 8px; text-decoration: none; color: white; text-align: center; transition: all 0.3s;"
+               onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📝</div>
+                <div style="font-weight: bold;">Yangi test</div>
+                <small>Bilimlaringizni sinab ko'ring</small>
+            </a>
+
+            <a href="{% url 'quiz:education' %}" 
+               style="background: rgba(255,255,255,0.2); padding: 1.5rem; border-radius: 8px; text-decoration: none; color: white; text-align: center; transition: all 0.3s;"
+               onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📚</div>
+                <div style="font-weight: bold;">Ta'lim</div>
+                <small>Qoidalarni o'rganing</small>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.test-header {
+    position: relative;
+}
+
+.test-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"><animate attributeName="r" values="1;30;1" dur="3s" repeatCount="indefinite"/></circle></svg>') center/cover;
+    opacity: 0.1;
+}
+</style>
+{% endblock %}

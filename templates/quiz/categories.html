@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Test mavzularini tanlang - Avtotest{% endblock %}
+
+{% block content %}
+<div class="text-center" style="margin-bottom: 2rem;">
+    <h1 style="color: white; font-size: 2.5rem; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+        Haydovchilik guvohnomasi olish uchun professional test topshiring
+    </h1>
+    <div style="width: 60px; height: 4px; background: #ffd700; margin: 0 auto; border-radius: 2px;"></div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 2rem;">
+    <div class="card text-center">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">📚</div>
+        <h2 style="color: #333; margin-bottom: 1rem;">Mavzular bo'yicha test</h2>
+        <p style="color: #6c757d; margin-bottom: 1.5rem;">
+            Alohida mavzular bo'yicha chuqur bilim oling. Yo'l qoidalari, 
+            belgilar, birinchi yordam va boshqa muhim mavzularni o'rganing.
+        </p>
+        <a href="#categories" class="btn">Mavzularni o'rganish</a>
+    </div>
+
+    <div class="card text-center">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">📝</div>
+        <h2 style="color: #333; margin-bottom: 1rem;">Umumiy test variantlari</h2>
+        <p style="color: #6c757d; margin-bottom: 1.5rem;">
+            Barcha mavzulardan tuzilgan professional variantlar. Har bir 
+            variant 20ta savoldan iborat va ketma-ket tartibda beriladi.
+        </p>
+        <a href="{% url 'quiz:general_test' %}" class="btn">Variantlarni boshlash</a>
+    </div>
+</div>
+
+<div id="categories" style="margin-top: 3rem;">
+    <div class="card">
+        <h2 style="color: #667eea; text-align: center; margin-bottom: 2rem;">Test mavzularini tanlang</h2>
+        <p style="text-align: center; color: #6c757d; margin-bottom: 2rem;">
+            Qaysi mavzu bo'yicha bilimingizni sinab ko'rmoqchisiz?
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+            {% for category in categories %}
+            <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; text-align: center; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
+                <div style="margin-bottom: 1rem;">
+                    {% if category.icon %}
+                        <img src="{{ category.icon.url }}" alt="{{ category.name_uz }}" 
+                             style="width: 60px; height: 60px; object-fit: cover; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    {% else %}
+                        <div style="font-size: 2.5rem;">📋</div>
+                    {% endif %}
+                </div>
+                <h3 style="color: #333; margin-bottom: 0.5rem;">{{ category.name_uz }}</h3>
+                <p style="color: #6c757d; font-size: 0.9rem; margin-bottom: 1rem;">{{ category.question_count }} ta savol mavjud</p>
+                <a href="{% url 'quiz:category_test' category.id %}" class="btn" style="font-size: 0.9rem; padding: 0.5rem 1rem;">Kategoriyaga kirish</a>
+            </div>
+            {% empty %}
+            <div style="grid-column: 1/-1; text-align: center; color: #6c757d; padding: 2rem;">
+                <p>Hali kategoriyalar qo'shilmagan.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

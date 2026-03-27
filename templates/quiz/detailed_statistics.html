@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+
+{% block title %}Batafsil Statistika - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 1400px; margin: 0 auto;">
+    <!-- Header with User Info -->
+    <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <h1 style="margin: 0; font-size: 2.5rem;">
+                    👋 Salom, {{ user.first_name|default:user.username }}!
+                </h1>
+                <p style="margin: 0.5rem 0; opacity: 0.9;">
+                    Sizning test natijalari va o'sish tahlili
+                </p>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 0.5rem;">
+                    {% if analytics.avg_score >= 18 %}🏆
+                    {% elif analytics.avg_score >= 15 %}🥇
+                    {% elif analytics.avg_score >= 12 %}🥈
+                    {% elif analytics.avg_score >= 10 %}🥉
+                    {% else %}📚{% endif %}
+                </div>
+                <div style="font-size: 1.2rem; font-weight: bold;">
+                    {% if analytics.avg_score >= 18 %}Ekspert
+                    {% elif analytics.avg_score >= 15 %}Malakali
+                    {% elif analytics.avg_score >= 12 %}O'rganuvchi
+                    {% elif analytics.avg_score >= 10 %}Boshlang'ich
+                    {% else %}Yangi boshlovchi{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div class="card text-center" style="border-left: 4px solid #667eea;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
+            <h4 style="color: #333; margin: 0;">Jami testlar</h4>
+            <div style="font-size: 1.8rem; font-weight: bold; color: #667eea;">{{ analytics.total_tests }}</div>
+        </div>
+
+        <div class="card text-center" style="border-left: 4px solid #28a745;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📈</div>
+            <h4 style="color: #333; margin: 0;">O'rtacha ball</h4>
+            <div style="font-size: 1.8rem; font-weight: bold; color: #28a745;">{{ analytics.avg_score }}/20</div>
+        </div>
+
+        <div class="card text-center" style="border-left: 4px solid #ffc107;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
+            <h4 style="color: #333; margin: 0;">So'nggi 5 ta</h4>
+            <div style="font-size: 1.8rem; font-weight: bold; color: #ffc107;">{{ analytics.last_5_avg }}/20</div>
+        </div>
+
+        <div class="card text-center" style="border-left: 4px solid 
+            {% if analytics.progress_trend == 'improving' %}#28a745
+            {% elif analytics.progress_trend == 'declining' %}#dc3545
+            {% else %}#6c757d{% endif %};">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">
+                {% if analytics.progress_trend == 'improving' %}📈
+                {% elif analytics.progress_trend == 'declining' %}📉
+                {% else %}➖{% endif %}
+            </div>
+            <h4 style="color: #333; margin: 0;">Tendentsiya</h4>
+            <div style="font-size: 1.2rem; font-weight: bold; color: 
+                {% if analytics.progress_trend == 'improving' %}#28a745
+                {% elif analytics.progress_trend == 'declining' %}#dc3545
+                {% else %}#6c757d{% endif %};">
+                {% if analytics.progress_trend == 'improving' %}O'sish
+                {% elif analytics.progress_trend == 'declining' %}Kamayish
+                {% elif analytics.progress_trend == 'stable' %}Barqaror
+                {% else %}Ma'lumot kam{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Performance Analysis -->
+    {% if analytics.category_analysis %}
+    <div class="card" style="margin-bottom: 2rem;">
+        <h2 style="color: #333; margin-bottom: 1.5rem; display: flex; align-items: center;">
+            <span style="margin-right: 0.5rem;">📊</span>
+            Mavzular bo'yicha tahlil
+        </h2>
+
+        <div style="display: grid; gap: 1rem;">
+            {% for analysis in analytics.category_analysis %}
+            <div style="background: #f8f9fa; border-radius: 8px; padding: 1.5rem; border-left: 4px solid 
+                {% if analysis.status == 'excellent' %}#28a745
+                {% elif analysis.status == 'good' %}#ffc107
+                {% else %}#dc3545{% endif %};">
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0; color: #333;">
+                        {{ analysis.category.icon }} {{ analysis.category.name_uz }}
+                    </h3>
+                    <div style="text-align: right;">
+                        <div style="font-size: 1.5rem; font-weight: bold; color: 
+                            {% if analysis.status == 'excellent' %}#28a745
+                            {% elif analysis.status == 'good' %}#ffc107
+                            {% else %}#dc3545{% endif %};">
+                            {{ analysis.accuracy }}%
+                        </div>
+                        <small style="color: #6c757d;">{{ analysis.correct_answers }}/{{ analysis.total_questions }} to'g'ri</small>
+                    </div>
+                </div>
+
+                <div style="background: white; border-radius: 6px; padding: 1rem; margin-bottom: 1rem;">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
+                        <div>
+                            <div style="color: #28a745; font-weight: bold; font-size: 1.2rem;">{{ analysis.correct_answers }}</div>
+                            <small style="color: #6c757d;">To'g'ri javoblar</small>
+                        </div>
+                        <div>
+                            <div style="color: #dc3545; font-weight: bold; font-size: 1.2rem;">{{ analysis.wrong_answers }}</div>
+                            <small style="color: #6c757d;">Xato javoblar</small>
+                        </div>
+                        <div>
+                            <div style="color: #667eea; font-weight: bold; font-size: 1.2rem;">{{ analysis.total_questions }}</div>
+                            <small style="color: #6c757d;">Jami savollar</small>
+                        </div>
+                    </div>
+                </div>
+
+                {% if analysis.wrong_answers > 0 and analysis.education_materials %}
+                <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; padding: 1rem;">
+                    <h4 style="color: #856404; margin: 0 0 0.5rem 0;">💡 Tavsiya etilgan materiallar:</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem;">
+                        {% for material in analysis.education_materials %}
+                        <a href="/quiz/education/content/{{ material.id }}/" 
+                           style="display: flex; align-items: center; padding: 0.5rem; background: white; border-radius: 4px; text-decoration: none; color: #333; border: 1px solid #e9ecef;">
+                            <span style="margin-right: 0.5rem;">
+                                {% if material.content_type == 'video' %}📹
+                                {% elif material.content_type == 'text' %}📄
+                                {% else %}🖼️{% endif %}
+                            </span>
+                            <span style="font-size: 0.9rem;">{{ material.title|truncatechars:25 }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Smart Recommendations -->
+    {% if analytics.recommendations %}
+    <div class="card" style="margin-bottom: 2rem;">
+        <h2 style="color: #333; margin-bottom: 1.5rem; display: flex; align-items: center;">
+            <span style="margin-right: 0.5rem;">🎯</span>
+            Shaxsiy tavsiyalar
+        </h2>
+
+        <div style="display: grid; gap: 1rem;">
+            {% for recommendation in analytics.recommendations %}
+            <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 8px; padding: 1.5rem; border-left: 4px solid #667eea;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                    <div>
+                        <h3 style="margin: 0 0 0.5rem 0; color: #333;">
+                            {{ recommendation.category }} bo'yicha yaxshilash
+                        </h3>
+                        <p style="margin: 0; color: #6c757d;">
+                            Aniqlik: {{ recommendation.accuracy }}% 
+                            ({{ recommendation.wrong_count }} ta xato javob)
+                        </p>
+                    </div>
+                    <div style="background: #dc3545; color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem;">
+                        Diqqat talab qiladi
+                    </div>
+                </div>
+
+                <div style="background: white; border-radius: 6px; padding: 1rem;">
+                    <h4 style="color: #333; margin: 0 0 0.75rem 0;">📚 O'rganish uchun materiallar:</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.75rem;">
+                        {% for material in recommendation.materials %}
+                        <a href="{{ material.url }}" 
+                           style="display: flex; align-items: center; padding: 1rem; background: #f8f9fa; border-radius: 6px; text-decoration: none; color: #333; border: 1px solid #e9ecef; transition: all 0.3s;"
+                           onmouseover="this.style.background='#e9ecef'" 
+                           onmouseout="this.style.background='#f8f9fa'">
+                            <div style="font-size: 1.5rem; margin-right: 0.75rem;">{{ material.icon }}</div>
+                            <div>
+                                <div style="font-weight: bold; margin-bottom: 0.25rem;">{{ material.title }}</div>
+                                <small style="color: #6c757d; text-transform: capitalize;">{{ material.type }}</small>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Center -->
+    <div class="card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+        <h2 style="margin: 0 0 1.5rem 0; display: flex; align-items: center;">
+            <span style="margin-right: 0.5rem;">🚀</span>
+            Keyingi qadamlar
+        </h2>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <a href="/quiz/categories/" 
+               style="background: rgba(255,255,255,0.2); padding: 1.5rem; border-radius: 8px; text-decoration: none; color: white; text-align: center; transition: all 0.3s;"
+               onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
+                <div style="font-weight: bold;">Yangi test topshirish</div>
+                <small>Bilimlaringizni sinab ko'ring</small>
+            </a>
+
+            <a href="/quiz/education/" 
+               style="background: rgba(255,255,255,0.2); padding: 1.5rem; border-radius: 8px; text-decoration: none; color: white; text-align: center; transition: all 0.3s;"
+               onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📚</div>
+                <div style="font-weight: bold;">Ta'lim materiallari</div>
+                <small>Yangi narsalarni o'rganing</small>
+            </a>
+
+            <a href="/quiz/general-tests/" 
+               style="background: rgba(255,255,255,0.2); padding: 1.5rem; border-radius: 8px; text-decoration: none; color: white; text-align: center; transition: all 0.3s;"
+               onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+               onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎯</div>
+                <div style="font-weight: bold;">Umumiy test</div>
+                <small>Barcha mavzulardan</small>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.text-center {
+    text-align: center;
+}
+</style>
+{% endblock %}

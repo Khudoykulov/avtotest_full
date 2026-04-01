@@ -70,13 +70,27 @@ class CategoryAdmin(admin.ModelAdmin):
 class AnswerInline(admin.TabularInline):
     model = Answer
     extra = 4
+    fields = ('answer_text', 'is_correct')
+
+    def get_readonly_fields(self, request, obj=None):
+        return []
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'get_short_question', 'category', 'answers_count', 'has_image', 'created_at')
+    list_display = ('id', 'get_short_question', 'category', 'answers_count', 'has_image', 'has_correct_answer', 'created_at')
     list_filter = ('category', 'created_at')
     search_fields = ('question_text',)
     inlines = [AnswerInline]
+
+    def has_correct_answer(self, obj):
+        correct = obj.answers.filter(is_correct=True).first()
+        if correct:
+            return format_html(
+                '<span style="color: green; font-weight: bold;">✅ {}</span>',
+                correct.answer_text[:30]
+            )
+        return format_html('<span style="color: red;">❌ Belgilanmagan</span>')
+    has_correct_answer.short_description = "To'g'ri javob"
     
     def get_short_question(self, obj):
         return obj.question_text[:50] + '...' if len(obj.question_text) > 50 else obj.question_text

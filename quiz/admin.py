@@ -4,9 +4,26 @@ from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.utils.html import format_html
 from django import forms
-from .models import Category, Question, Answer, TestTicket, TestResult, UserAnswer, EducationContent
+from .models import Category, Question, Answer, TestTicket, TestResult, UserAnswer, EducationContent, APIConfig, PWASetting
 import random
-from .models import APIConfig
+
+
+@admin.register(PWASetting)
+class PwaSettingAdmin(admin.ModelAdmin):
+    list_display = ('name', 'short_name', 'theme_color', 'background_color', 'is_active', 'icon_192_preview', 'icon_512_preview')
+    fields = ('name', 'short_name', 'description', 'theme_color', 'background_color', 'icon_192', 'icon_512', 'is_active')
+
+    def icon_192_preview(self, obj):
+        if obj.icon_192:
+            return format_html('<img src="{}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">', obj.icon_192.url)
+        return "—"
+    icon_192_preview.short_description = "192x192"
+
+    def icon_512_preview(self, obj):
+        if obj.icon_512:
+            return format_html('<img src="{}" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">', obj.icon_512.url)
+        return "—"
+    icon_512_preview.short_description = "512x512"
 
 
 @admin.register(APIConfig)

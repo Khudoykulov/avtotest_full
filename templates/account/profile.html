@@ -49,6 +49,23 @@
             </div>
         </div>
 
+        <!-- PWA O'rnatish -->
+        <div id="pwa-install-card" style="display:none; margin-top: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 1.5rem; color: white; text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📲</div>
+            <h3 style="margin-bottom: 0.5rem;">Ilovani o'rnatish</h3>
+            <p style="opacity: 0.9; margin-bottom: 1rem; font-size: 0.95rem;">
+                Avtotest ilovasini telefoningizga o'rnating — internetnsiz ham ishlaydi!
+            </p>
+            <button id="pwa-install-btn" style="background: white; color: #667eea; border: none; padding: 0.7rem 2rem; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer;">
+                O'rnatish
+            </button>
+        </div>
+
+        <div id="pwa-installed-card" style="display:none; margin-top: 2rem; background: #d4edda; border-radius: 12px; padding: 1.2rem; text-align: center; border: 1px solid #c3e6cb;">
+            <span style="font-size: 1.5rem;">✅</span>
+            <p style="color: #155724; margin: 0.3rem 0 0; font-weight: 600;">Ilova allaqachon o'rnatilgan!</p>
+        </div>
+
         <div class="text-center mt-3">
             <a href="{% url 'quiz:statistics' %}" class="btn">Batafsil statistika</a>
             <a href="{% url 'home' %}" class="btn btn-secondary">Bosh sahifaga qaytish</a>
@@ -57,6 +74,44 @@
     <a href="{% url 'account:profile_update' %}" class="btn btn-primary">
     <i class="bi bi-pencil-square"></i> Ma'lumotlarni yangilash
 </a>
+
+<script>
+(function () {
+    var installCard = document.getElementById('pwa-install-card');
+    var installedCard = document.getElementById('pwa-installed-card');
+    var installBtn = document.getElementById('pwa-install-btn');
+    var deferredPrompt = null;
+
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+        installedCard.style.display = 'block';
+        return;
+    }
+
+    window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        installCard.style.display = 'block';
+    });
+
+    installBtn.addEventListener('click', function () {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(function (result) {
+            if (result.outcome === 'accepted') {
+                installCard.style.display = 'none';
+                installedCard.style.display = 'block';
+            }
+            deferredPrompt = null;
+        });
+    });
+
+    window.addEventListener('appinstalled', function () {
+        installCard.style.display = 'none';
+        installedCard.style.display = 'block';
+        deferredPrompt = null;
+    });
+})();
+</script>
 
 </div>
 {% endblock %}

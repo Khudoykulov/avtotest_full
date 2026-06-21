@@ -1,16 +1,90 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from django.db.models import Avg, Count, Q, Max
 from django.db.models.functions import TruncDate
 from django.db import models
-from .models import Category, TestTicket, Question, TestResult, UserAnswer, EducationContent, UserProgress
+from .models import Category, TestTicket, Question, TestResult, UserAnswer, EducationContent, UserProgress, PWASetting
 from .ai_analytics import get_ai_insights_for_user, get_ai_analysis_for_single_test
 import json
 from datetime import timedelta, datetime
 from random import sample, shuffle
 import math
+
+
+def manifest_json(request):
+    pwa = PWASetting.get_active()
+    if pwa:
+        icons = []
+        if pwa.icon_192:
+            icons.append({"src": request.build_absolute_uri(pwa.icon_192.url), "sizes": "192x192", "type": "image/png", "purpose": "any maskable"})
+        if pwa.icon_512:
+            icons.append({"src": request.build_absolute_uri(pwa.icon_512.url), "sizes": "512x512", "type": "image/png", "purpose": "any maskable"})
+        manifest = {
+            "name": pwa.name,
+            "short_name": pwa.short_name,
+            "description": pwa.description,
+            "start_url": "/",
+            "display": "standalone",
+            "background_color": pwa.background_color,
+            "theme_color": pwa.theme_color,
+            "icons": icons,
+            "lang": "uz",
+            "orientation": "portrait-primary",
+        }
+    else:
+        manifest = {
+            "name": "Avtotest",
+            "short_name": "Avtotest",
+            "description": "Haydovchilik guvohnomasi tayyorgarlik platformasi",
+            "start_url": "/",
+            "display": "standalone",
+            "background_color": "#ffffff",
+            "theme_color": "#667eea",
+            "icons": [],
+            "lang": "uz",
+        }
+    response = JsonResponse(manifest)
+    response['Content-Type'] = 'application/manifest+json'
+    return response
+
+
+def service_worker(request):
+    sw_content = """
+const CACHE_NAME = 'avtotest-v1';
+const STATIC_URLS = ['/'];
+
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_URLS))
+    );
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(keys =>
+            Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+        )
+    );
+    self.clients.claim();
+});
+
+self.addEventListener('fetch', event => {
+    if (event.request.method !== 'GET') return;
+    event.respondWith(
+        fetch(event.request)
+            .then(response => {
+                const clone = response.clone();
+                caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+                return response;
+            })
+            .catch(() => caches.match(event.request))
+    );
+});
+"""
+    return HttpResponse(sw_content.strip(), content_type='application/javascript')
 
 
 def home_view(request):

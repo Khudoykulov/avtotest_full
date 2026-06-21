@@ -292,6 +292,28 @@ class StudyPlan(models.Model):
         return f"{self.title} - {self.user.username}"
 
 
+class PWASetting(models.Model):
+    name = models.CharField(max_length=100, default="Avtotest")
+    short_name = models.CharField(max_length=30, default="Avtotest")
+    description = models.CharField(max_length=200, blank=True, default="Haydovchilik guvohnomasi tayyorgarlik platformasi")
+    theme_color = models.CharField(max_length=7, default="#667eea")
+    background_color = models.CharField(max_length=7, default="#ffffff")
+    icon_192 = models.ImageField(upload_to='pwa/', blank=True, null=True)
+    icon_512 = models.ImageField(upload_to='pwa/', blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "PWA Sozlama"
+        verbose_name_plural = "PWA Sozlamalar"
+
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def get_active(cls):
+        return cls.objects.filter(is_active=True).first()
+
+
 class APIConfig(models.Model):
     api_key = models.CharField(max_length=500)
     priority = models.IntegerField(default=1)

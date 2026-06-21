@@ -19,11 +19,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from quiz.views import home_view
+from quiz.views import home_view, manifest_json, service_worker
 from test_view import test_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('manifest.json', manifest_json, name='pwa_manifest'),
+    path('sw.js', service_worker, name='service_worker'),
     path('', home_view, name='home'),
     path('account/', include('account.urls')),
     path('quiz/', include('quiz.urls')),

@@ -164,13 +164,18 @@
     }
 
     @media (max-width: 768px) {
-        .page-header h1  { font-size: 1.8rem; }
-        .variants-grid   { grid-template-columns: 1fr; }
-        .info-grid       { grid-template-columns: repeat(2, 1fr); }
+        .page-header h1  { font-size: 1.6rem; }
+        .page-header p   { font-size: 1rem; }
+        .variants-grid   { grid-template-columns: 1fr; gap: 1rem; }
+        .info-grid       { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        .info-section    { padding: 1.5rem; }
+        .results-section { padding: 1rem; }
     }
 
     @media (max-width: 480px) {
+        .page-header h1  { font-size: 1.3rem; }
         .info-grid { grid-template-columns: 1fr 1fr; }
+        .variant-card { padding: 1.25rem; }
     }
 </style>
 {% endblock %}
@@ -320,11 +325,13 @@
 </div>
 {% endif %}
 
-<div style="text-align: center; margin: 3rem 0;">
-    <p style="color: white; font-size: 1.1rem; margin-bottom: 1rem;">
+<div style="text-align: center; margin: 2rem 0;">
+    <p style="color: white; font-size: 1rem; margin-bottom: 1rem;">
         🔥 <strong>Maslahat:</strong> Avval birinchi variantdan boshlab ketma-ket ishlang
     </p>
-    <a href="{% url 'quiz:statistics' %}" class="btn btn-secondary">📊 Statistikani ko'rish</a>
-    <a href="{% url 'quiz:recommendations' %}" class="btn btn-secondary" style="margin-left: 1rem;">🎯 Tavsiyalar</a>
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem;">
+        <a href="{% url 'quiz:statistics' %}" class="btn btn-secondary">📊 Statistikani ko'rish</a>
+        <a href="{% url 'quiz:recommendations' %}" class="btn btn-secondary">🎯 Tavsiyalar</a>
+    </div>
 </div>
 {% endblock %}

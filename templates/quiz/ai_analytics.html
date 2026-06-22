@@ -8,22 +8,22 @@
     <div class="card ai-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 2rem; position: relative; overflow: hidden;">
         <div style="position: absolute; top: 20px; right: 20px; font-size: 3rem; opacity: 0.3;">🤖</div>
         <div style="position: relative; z-index: 2;">
-            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                <div style="background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 50%; font-size: 2rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                <div style="background: rgba(255,255,255,0.2); padding: 0.8rem; border-radius: 50%; font-size: 1.8rem; flex-shrink: 0;">
                     🧠
                 </div>
-                <div>
-                    <h1 style="margin: 0; font-size: 2.5rem;">AI Statistik</h1>
-                    <p style="margin: 0; opacity: 0.9;">Sun'iy intellekt yordamida xatolaringizni tahlil qiling</p>
+                <div style="min-width: 0;">
+                    <h1 style="margin: 0; font-size: clamp(1.4rem, 5vw, 2.5rem);">AI Statistik</h1>
+                    <p style="margin: 0; opacity: 0.9; font-size: 0.9rem;">Sun'iy intellekt yordamida xatolaringizni tahlil qiling</p>
                 </div>
             </div>
             
             {% if ai_insights.confidence > 0 %}
             <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>AI tahlil ishonchliligi:</span>
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <div style="background: rgba(255,255,255,0.3); height: 8px; width: 200px; border-radius: 4px; overflow: hidden;">
+                <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.5rem;">
+                    <span style="white-space: nowrap;">AI tahlil ishonchliligi:</span>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 150px;">
+                        <div style="background: rgba(255,255,255,0.3); height: 8px; flex: 1; border-radius: 4px; overflow: hidden;">
                             <div style="background: #28a745; height: 100%; width: {{ ai_insights.confidence }}%; transition: width 0.3s;"></div>
                         </div>
                         <strong>{{ ai_insights.confidence }}%</strong>
@@ -334,6 +334,25 @@
 @keyframes typeIn {
     from { opacity: 0; }
     to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .card {
+        padding: 1rem !important;
+    }
+    .card table {
+        font-size: 0.78rem;
+        min-width: 420px;
+    }
+    .card table th,
+    .card table td {
+        padding: 0.5rem 0.35rem !important;
+    }
+    /* Sana ustunini mobilda yashirish */
+    .card table th:nth-child(4),
+    .card table td:nth-child(4) {
+        display: none;
+    }
 }
 </style>
 

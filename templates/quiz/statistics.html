@@ -6,13 +6,12 @@
 <div style="max-width: 1200px; margin: 0 auto;">
     <!-- Header -->
     <div class="text-center" style="margin-bottom: 2rem;">
-        <h1 style="color: white; font-size: 2.5rem; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+        <h1 style="color: white; font-size: clamp(1.4rem, 5vw, 2.5rem); margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
             Sizning statistikangiz
         </h1>
-        <p style="color: rgba(255,255,255,0.9); font-size: 1.1rem;">
+        <p style="color: rgba(255,255,255,0.9); font-size: 1rem;">
             Test natijalari va taraqqiyot tahlili
         </p>
-        
     </div>
 
     <!-- Overview Cards -->
@@ -330,16 +329,31 @@ function drawChart(ctx, data) {
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .card table {
-        font-size: 0.9rem;
+        font-size: 0.78rem;
+        min-width: 520px;
     }
-    
     .card table th,
     .card table td {
-        padding: 0.5rem !important;
+        padding: 0.5rem 0.4rem !important;
     }
-    
     #performanceChart {
         height: 250px !important;
+    }
+    /* Vaqt ustunini mobilda yashirish */
+    .card table th:nth-child(5),
+    .card table td:nth-child(5) {
+        display: none;
+    }
+    .text-center .btn {
+        display: block;
+        width: 100%;
+        margin: 0.3rem 0 !important;
+    }
+}
+@media (max-width: 480px) {
+    .card table th:nth-child(6),
+    .card table td:nth-child(6) {
+        display: none;
     }
 }
 

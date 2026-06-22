@@ -6,40 +6,40 @@
 <div style="max-width: 1200px; margin: 0 auto;">
     <div class="card">
         <!-- Test Header -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #e9ecef;">
-            <button onclick="window.history.back()" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
-                ← Testni tugatish
+        <div id="test-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid #e9ecef;">
+            <button onclick="window.history.back()" style="background: #6c757d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; white-space: nowrap; flex-shrink: 0;">
+                ← Tugatish
             </button>
-            <div style="text-align: center;">
-                <h1 style="color: #667eea; margin: 0;">{{ test_name }}</h1>
+            <div style="text-align: center; flex: 1; padding: 0 0.5rem; min-width: 0;">
+                <h1 style="color: #667eea; margin: 0; font-size: clamp(1rem, 4vw, 1.8rem); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ test_name }}</h1>
                 {% if test_type == 'ticket' %}
-                    <p style="color: #6c757d; margin: 0.5rem 0 0 0; font-size: 0.9rem;">📋 Biletlik test - 20 ta savol</p>
+                    <p style="color: #6c757d; margin: 0.25rem 0 0 0; font-size: 0.8rem;">📋 Biletlik test - 20 ta savol</p>
                 {% elif test_type == 'category' %}
-                    <p style="color: #6c757d; margin: 0.5rem 0 0 0; font-size: 0.9rem;">📚 Kategoriya testi - 20 ta savol</p>
+                    <p style="color: #6c757d; margin: 0.25rem 0 0 0; font-size: 0.8rem;">📚 Kategoriya testi - 20 ta savol</p>
                 {% elif test_type == 'general' %}
-                    <p style="color: #6c757d; margin: 0.5rem 0 0 0; font-size: 0.9rem;">🎯 Umumiy test - 20 ta savol</p>
+                    <p style="color: #6c757d; margin: 0.25rem 0 0 0; font-size: 0.8rem;">🎯 Umumiy test - 20 ta savol</p>
                 {% endif %}
             </div>
-            <div></div>
+            <div style="flex-shrink: 0; width: 90px;"></div>
         </div>
 
         <!-- Test Stats -->
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-bottom: 2rem;">
-            <div style="text-align: center; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
-                <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 0.5rem;">JORIY SAVOL</div>
-                <div id="current-question" style="font-size: 1.5rem; font-weight: bold; color: #333;">1/{{ questions.count }}</div>
+        <div id="test-stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="text-align: center; background: #f8f9fa; padding: 0.75rem; border-radius: 8px;">
+                <div style="color: #6c757d; font-size: 0.75rem; margin-bottom: 0.25rem;">SAVOL</div>
+                <div id="current-question" style="font-size: 1.2rem; font-weight: bold; color: #333;">1/{{ questions.count }}</div>
             </div>
-            <div style="text-align: center; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
-                <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 0.5rem;">NATIJA</div>
-                <div id="correct-count" style="font-size: 1.5rem; font-weight: bold; color: #6c757d;">?</div>
+            <div style="text-align: center; background: #f8f9fa; padding: 0.75rem; border-radius: 8px;">
+                <div style="color: #6c757d; font-size: 0.75rem; margin-bottom: 0.25rem;">NATIJA</div>
+                <div id="correct-count" style="font-size: 1.2rem; font-weight: bold; color: #6c757d;">?</div>
             </div>
-            <div style="text-align: center; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
-                <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 0.5rem;">QOLGAN VAQT</div>
-                <div id="timer" style="font-size: 1.5rem; font-weight: bold; color: #dc3545;">20:00</div>
+            <div style="text-align: center; background: #f8f9fa; padding: 0.75rem; border-radius: 8px;">
+                <div style="color: #6c757d; font-size: 0.75rem; margin-bottom: 0.25rem;">VAQT</div>
+                <div id="timer" style="font-size: 1.2rem; font-weight: bold; color: #dc3545;">20:00</div>
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
+        <div id="test-main-grid" style="display: grid; grid-template-columns: 1fr 300px; gap: 2rem;">
             <!-- Question Area -->
             <div>
                 <div id="question-container">
@@ -785,18 +785,35 @@ label:hover {
 }
 
 @media (max-width: 768px) {
-    .card > div:first-child {
+    #test-main-grid {
         grid-template-columns: 1fr !important;
-        gap: 1rem !important;
     }
-    
+    #test-stats-grid {
+        gap: 0.5rem !important;
+    }
     #question-grid {
         grid-template-columns: repeat(5, 1fr) !important;
     }
-    
     .btn {
         font-size: 0.9rem !important;
-        padding: 0.7rem 1.5rem !important;
+        padding: 0.7rem 1.2rem !important;
+    }
+    .action-buttons {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+@media (max-width: 480px) {
+    #test-header {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    #test-header > div:last-child { display: none; }
+    .action-buttons {
+        grid-template-columns: 1fr !important;
+    }
+    .action-buttons button {
+        padding: 1rem !important;
+        font-size: 1rem !important;
     }
 }
 

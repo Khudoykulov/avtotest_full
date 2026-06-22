@@ -2,9 +2,29 @@
 
 {% block title %}Tasodifiy biletlarni tanlang - Avtotest{% endblock %}
 
+{% block extra_css %}
+<style>
+.tickets-title {
+    color: white;
+    font-size: clamp(1.3rem, 4.5vw, 2.5rem);
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.tickets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+    gap: 1.5rem;
+}
+@media (max-width: 480px) {
+    .tickets-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+    .tickets-grid > div { padding: 1rem !important; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="text-center" style="margin-bottom: 2rem;">
-    <h1 style="color: white; font-size: 2.5rem; margin-bottom: 0.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+    <h1 class="tickets-title">
         Haydovchilik guvohnomasi olish uchun professional test topshiring
     </h1>
     <div style="width: 60px; height: 4px; background: #ffd700; margin: 0 auto; border-radius: 2px;"></div>
@@ -20,7 +40,7 @@
         </p>
     </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem;">
+    <div class="tickets-grid">
         {% for ticket in tickets %}
         <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 12px; text-align: center; border: 2px solid transparent; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-weight: bold; font-size: 1.1rem;">{{ ticket.ticket_number }}</div>

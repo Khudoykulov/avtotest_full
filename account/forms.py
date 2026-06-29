@@ -8,6 +8,10 @@ class CustomUserCreationForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=False, help_text='Ixtiyoriy')
     last_name = forms.CharField(max_length=30, required=False, help_text='Ixtiyoriy')
     phone_number = forms.CharField(max_length=15, required=False, help_text='Ixtiyoriy')
+    agree_terms = forms.BooleanField(
+        required=True,
+        error_messages={'required': 'Ro\'yxatdan o\'tish uchun shaxsga doir ma\'lumotlarni qayta ishlashga rozilik berishingiz shart.'}
+    )
 
     class Meta:
         model = CustomUser
@@ -17,7 +21,10 @@ class CustomUserCreationForm(UserCreationForm):
         super().__init__(*args, **kwargs)
         # Add CSS classes to form fields
         for field_name, field in self.fields.items():
-            field.widget.attrs['class'] = 'form-control'
+            if field_name == 'agree_terms':
+                field.widget.attrs['class'] = 'form-check-input'
+            else:
+                field.widget.attrs['class'] = 'form-control'
             
         # Customize help texts in Uzbek
         self.fields['username'].help_text = 'Faqat harflar, raqamlar va @/./+/-/_ belgilaridan foydalaning.'

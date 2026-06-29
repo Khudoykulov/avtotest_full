@@ -242,13 +242,13 @@ TEST NATIJASI:
 - Aniqlik: {data['accuracy_percentage']}%
 
 XATO QILINGAN SAVOLLAR:
-{json.dumps(data['wrong_answers'][:10], ensure_ascii=False, indent=2)}
+{json.dumps(data['wrong_answers'][:20], ensure_ascii=False, indent=2)}
 
 VAZIFANGIZ:
 1. Test natijasini baholang
 2. Xatolarni tushuntiring
 3. Qaysi mavzularni takrorlash kerakligini ayting
-4. Motivatsion so'zlar bilan yakunlang
+4. Xato savollarga tug'ri javob bering va nima uchun tugri shu javob qisqa izoh qoldiring tushuntiring
 
 Javob o'zbek tilida bo'lsin.
 """
@@ -260,8 +260,8 @@ Javob o'zbek tilida bo'lsin.
         payload = {
             "model": self.model_name,
             "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.5,
-            "max_tokens": 800
+            "temperature": 0.3,
+            "max_tokens": 4000
         }
 
         for attempt in range(3):
